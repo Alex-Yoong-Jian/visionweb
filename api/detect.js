@@ -2,28 +2,30 @@
  * VisionWeb — Vercel Serverless Function
  * File: api/detect.js
  *
- * Acts as a secure proxy between the browser and Google Cloud Vision API.
- * The API key is stored in Vercel environment variables and never exposed
- * to the browser or GitHub.
+ * Secure proxy between the browser and Anthropic Claude API.
+ * The API key is stored in Vercel environment variables — never
+ * exposed to the browser or GitHub.
  *
  * Endpoint: POST /api/detect
- * Body:     { image: "<base64 string>" }
- * Returns:  { mode, description, score, isLandmark }
+ * Body:     { image: "<base64 JPEG string>" }
+ * Returns:  { mode, description, descriptionMY, score }
  */
 
-const VISION_ENDPOINT = 'https://vision.googleapis.com/v1/images:annotate';
+const CLAUDE_ENDPOINT = 'https://api.anthropic.com/v1/messages';
+const MODEL           = 'claude-haiku-4-5-20251001';
+const MAX_TOKENS      = 300;
 
 export default async function handler(req, res) {
 
-  // ── Only allow POST requests ──
+  // ── Only allow POST ──
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   // ── Read API key from Vercel environment variable ──
-  const apiKey = process.env.VISION_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    console.error('VISION_API_KEY environment variable is not set');
+    console.error('ANTHROPIC_API_KEY environment variable is not set');
     return res.status(500).json({ error: 'API key not configured on server' });
   }
 
@@ -33,48 +35,75 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing or invalid image data' });
   }
 
-  // ── Validate base64 string length (prevent abuse) ──
-  // A 1280x720 JPEG at 85% quality is typically under 300KB
-  // Base64 adds ~37% overhead → ~410KB → ~420,000 chars
+  // ── Validate image size (1280x720 JPEG at 85% ≈ 420KB → ~570K base64 chars) ──
   if (image.length > 600000) {
     return res.status(400).json({ error: 'Image too large' });
   }
 
   try {
-    // ── Call Google Cloud Vision API ──
-    const body = {
-      requests: [{
-        image: { content: image },
-        features: [
-          { type: 'OBJECT_LOCALIZATION', maxResults: 10 },
-          { type: 'LABEL_DETECTION',     maxResults: 10 },
-          { type: 'LANDMARK_DETECTION',  maxResults: 3  },
-        ]
-      }]
-    };
+    // ── Call Claude Haiku with the image ──
+    const response = await fetch(CLAUDE_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type':      'application/json',
+        'x-api-key':         apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model:      MODEL,
+        max_tokens: MAX_TOKENS,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type:   'image',
+              source: {
+                type:       'base64',
+                media_type: 'image/jpeg',
+                data:       image,
+              }
+            },
+            {
+              type: 'text',
+              text: `You are an accessibility assistant for visually impaired users.
+Analyse this image and describe the most prominent subject you see.
 
-    const visionResp = await fetch(`${VISION_ENDPOINT}?key=${apiKey}`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(body)
+Respond ONLY with a valid JSON object — no markdown, no explanation, no extra text:
+{
+  "mode": "portrait" or "scene",
+  "description": "<short English noun phrase>",
+  "descriptionMY": "<same phrase translated to Malay>",
+  "score": <confidence float 0.0–1.0>
+}
+
+Rules:
+- mode "portrait": a specific identifiable object or person is the clear focus
+- mode "scene": general environment, setting, or multiple objects without one clear subject
+- description: a concise noun phrase (e.g. "a wooden chair", "a person using a laptop", "an outdoor street market")
+- descriptionMY: accurate Malay translation of the description
+- score: your confidence level
+- Never start description with "I see" or "The image shows"`
+            }
+          ]
+        }]
+      })
     });
 
-    if (!visionResp.ok) {
-      const errData = await visionResp.json().catch(() => ({}));
-      const errMsg  = errData.error?.message || `Vision API HTTP ${visionResp.status}`;
-      console.error('Vision API error:', errMsg);
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const errMsg  = errData.error?.message || `Claude API HTTP ${response.status}`;
+      console.error('Claude API error:', errMsg);
       return res.status(502).json({ error: errMsg });
     }
 
-    const data   = await visionResp.json();
-    const result = data.responses?.[0];
+    const data    = await response.json();
+    const rawText = data.content?.[0]?.text || '';
 
-    if (!result) {
-      return res.status(502).json({ error: 'Empty response from Vision API' });
+    if (!rawText) {
+      return res.status(502).json({ error: 'Empty response from Claude' });
     }
 
-    // ── Parse and return result ──
-    const parsed = parseResult(result);
+    const parsed = parseClaudeResponse(rawText);
     return res.status(200).json(parsed);
 
   } catch (err) {
@@ -84,65 +113,29 @@ export default async function handler(req, res) {
 }
 
 /*
- * parseResult
- * Interprets the raw Google Vision API response into a
- * structured result object for the frontend.
+ * parseClaudeResponse
+ * Parses Claude's JSON response, with a safe fallback
+ * if the model returns prose instead of JSON.
  */
-function parseResult(result) {
-  const objects   = result.localizedObjectAnnotations || [];
-  const labels    = result.labelAnnotations           || [];
-  const landmarks = result.landmarkAnnotations        || [];
-
-  // ── Portrait mode: dominant central object ──
-  if (objects.length > 0) {
-    const top   = objects[0];
-    const score = top.score;
-    const name  = top.name;
-
-    const verts = top.boundingPoly?.normalizedVertices || [];
-    if (verts.length >= 2) {
-      const xs = verts.map(v => v.x || 0);
-      const ys = verts.map(v => v.y || 0);
-      const w  = Math.max(...xs) - Math.min(...xs);
-      const h  = Math.max(...ys) - Math.min(...ys);
-      const cx = (Math.max(...xs) + Math.min(...xs)) / 2;
-      const cy = (Math.max(...ys) + Math.min(...ys)) / 2;
-
-      // Object is central and large enough for portrait mode
-      const isCentral = (w * h) > 0.08
-        && cx > 0.2 && cx < 0.8
-        && cy > 0.2 && cy < 0.8;
-
-      if (isCentral && score > 0.6) {
-        return { mode: 'portrait', description: name, score };
-      }
-    }
-  }
-
-  // ── Landmark: a known place ──
-  if (landmarks.length > 0) {
+function parseClaudeResponse(text) {
+  // Strip any accidental markdown code fences
+  const cleaned = text.replace(/```json|```/g, '').trim();
+  try {
+    const parsed = JSON.parse(cleaned);
+    if (!parsed.mode || !parsed.description) throw new Error('Missing fields');
     return {
-      mode:       'scene',
-      description: landmarks[0].description,
-      score:       landmarks[0].score,
-      isLandmark:  true
+      mode:          parsed.mode          || 'scene',
+      description:   parsed.description   || cleaned,
+      descriptionMY: parsed.descriptionMY || parsed.description || cleaned,
+      score:         typeof parsed.score === 'number' ? parsed.score : 0.9,
+    };
+  } catch (e) {
+    // Fallback: treat the entire response as a scene description
+    return {
+      mode:          'scene',
+      description:   cleaned.slice(0, 120),
+      descriptionMY: cleaned.slice(0, 120),
+      score:         0.7,
     };
   }
-
-  // ── Scene mode: top labels ──
-  if (labels.length > 0) {
-    const topLabels = labels
-      .filter(l => l.score > 0.70)
-      .slice(0, 3)
-      .map(l => l.description.toLowerCase());
-
-    const description = topLabels.length > 0
-      ? topLabels.join(', ')
-      : labels[0].description;
-
-    return { mode: 'scene', description, score: labels[0].score };
-  }
-
-  // ── Nothing detected ──
-  return { mode: 'unknown', description: null, score: 0 };
 }
