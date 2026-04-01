@@ -8,7 +8,7 @@
              script-src 'unsafe-inline' https://cdn.jsdelivr.net;
              style-src 'unsafe-inline';
              media-src mediastream: blob:;
-             connect-src https://storage.googleapis.com;" />
+             connect-src https://storage.googleapis.com https://tfhub.dev https://www.kaggle.com https://kaggle.com https://cdn.jsdelivr.net blob:;" />
   <title>VisionWeb</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -455,7 +455,13 @@ const Detector = (() => {
   const CENTRE_COVERAGE_MIN  = 0.20;
 
   async function load() {
-    model = await cocoSsd.load({ base: 'mobilenet_v2' });
+    // Try full model first, fall back to lite version if it fails
+    try {
+      model = await cocoSsd.load({ base: 'mobilenet_v2' });
+    } catch (e) {
+      console.error('Full model failed, trying lite:', e.name);
+      model = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
+    }
   }
 
   function isCentral(bbox, imgW, imgH) {
