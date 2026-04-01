@@ -143,7 +143,11 @@
     <div class="error-msg" id="error-msg">Please reload the page and try again.</div>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+<!-- TensorFlow.js core -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.8.6/dist/tf.min.js"></script>
+<!-- TensorFlow.js converter (required by coco-ssd) -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@2.8.6/dist/tf-converter.min.js"></script>
+<!-- COCO-SSD object detection model -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
 <script>
 'use strict';
@@ -449,13 +453,10 @@ const Detector = (() => {
   const CENTRE_COVERAGE_MIN  = 0.20;
 
   async function load() {
-    // Try full model first, fall back to lite version if it fails
-    try {
-      model = await cocoSsd.load({ base: 'mobilenet_v2' });
-    } catch (e) {
-      console.error('Full model failed, trying lite:', e.name);
-      model = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
-    }
+    // Wait for TF backend to be ready before loading model
+    await tf.ready();
+    // Use lite_mobilenet_v2 — smallest and most compatible base model
+    model = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
   }
 
   function isCentral(bbox, imgW, imgH) {
