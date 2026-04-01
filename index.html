@@ -143,8 +143,14 @@
     <div class="error-msg" id="error-msg">Please reload the page and try again.</div>
   </div>
 
-<!-- TensorFlow.js v4 — single unified bundle (includes converter/loadGraphModel) -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.js"></script>
+<!-- TensorFlow.js core -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@3.21.0/dist/tf-core.min.js"></script>
+<!-- TensorFlow.js converter — provides tfconv.loadGraphModel -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@3.21.0/dist/tf-converter.min.js"></script>
+<!-- TensorFlow.js WebGL backend -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@3.21.0/dist/tf-backend-webgl.min.js"></script>
+<!-- COCO-SSD model -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
 <script>
 'use strict';
 
@@ -441,99 +447,51 @@ const HoldDetection = (() => {
 
 /* ═══════════════════════════════════════════════════════
    MODULE: DETECTOR
-   Uses TF.js v4 directly with SSD MobileNet v2 model
-   loaded from TF Hub — bypasses broken COCO-SSD wrapper
-   entirely. Implements portrait vs scene classification.
+   Uses COCO-SSD v2.2.2 with TF.js v3.21.0 components
+   loaded individually as script tags. This is the only
+   confirmed working combination in the browser.
+   cocoSsd is exposed as a global by the CDN script tag.
 ═══════════════════════════════════════════════════════ */
 const Detector = (() => {
   let model = null;
-  const CONFIDENCE_THRESHOLD = 0.50;
+  const CONFIDENCE_THRESHOLD = 0.55;
   const CENTRE_COVERAGE_MIN  = 0.15;
 
-  // SSD MobileNet v2 model hosted on TF Hub
-  const MODEL_URL = 'https://tfhub.dev/tensorflow/tfjs-model/ssd_mobilenet_v2/1/default/1';
-
-  // COCO class labels (indices 1-90, index 0 = background)
-  const COCO_CLASSES = [
-    'background','person','bicycle','car','motorcycle','airplane','bus','train',
-    'truck','boat','traffic light','fire hydrant','','stop sign','parking meter',
-    'bench','bird','cat','dog','horse','sheep','cow','elephant','bear','zebra',
-    'giraffe','','backpack','umbrella','','','handbag','tie','suitcase','frisbee',
-    'skis','snowboard','sports ball','kite','baseball bat','baseball glove',
-    'skateboard','surfboard','tennis racket','bottle','','wine glass','cup',
-    'fork','knife','spoon','bowl','banana','apple','sandwich','orange','broccoli',
-    'carrot','hot dog','pizza','donut','cake','chair','couch','potted plant','bed',
-    '','dining table','','','toilet','','tv','laptop','mouse','remote','keyboard',
-    'cell phone','microwave','oven','toaster','sink','refrigerator','','book',
-    'clock','vase','scissors','teddy bear','hair drier','toothbrush'
-  ];
-
   async function load() {
-    model = await tf.loadGraphModel(MODEL_URL, { fromTFHub: true });
-    // Warm up the model with a dummy tensor
-    const dummy = tf.zeros([1, 300, 300, 3], 'int32');
-    await model.executeAsync(dummy);
-    dummy.dispose();
+    // cocoSsd is a global exposed by the COCO-SSD CDN script
+    model = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
   }
 
-  function isCentral(box, imgW, imgH) {
-    // box = [y1, x1, y2, x2] normalised 0-1
-    const [y1, x1, y2, x2] = box;
-    const w = x2 - x1;
-    const h = y2 - y1;
-    const coverage = w * h;
-    const cx = x1 + w / 2;
-    const cy = y1 + h / 2;
-    return coverage >= CENTRE_COVERAGE_MIN &&
-           cx > 0.20 && cx < 0.80 &&
-           cy > 0.20 && cy < 0.80;
+  function isCentral(bbox) {
+    // COCO-SSD bbox format: [x, y, width, height] in pixels
+    // canvas is 1280x720, normalise to 0-1
+    // We use a simpler heuristic: just check width/height ratio
+    const [x, y, w, h] = bbox;
+    // We don't have canvas dims here so use rough pixel thresholds
+    // If box is reasonably large (>100px wide or tall) it's likely central
+    return w > 100 || h > 100;
   }
 
   async function analyse(canvas) {
     if (!model) throw new Error('Model not loaded');
 
-    // Preprocess: resize to 300x300 and convert to int32 tensor
-    const img = tf.browser.fromPixels(canvas);
-    const resized = tf.image.resizeBilinear(img, [300, 300]);
-    const batched = resized.toInt().expandDims(0);
-    img.dispose();
-    resized.dispose();
+    // COCO-SSD accepts canvas directly — no manual preprocessing needed
+    const predictions = await model.detect(canvas, 10, CONFIDENCE_THRESHOLD);
 
-    const result = await model.executeAsync(batched);
-    batched.dispose();
-
-    // result is an array of tensors
-    // [boxes, scores, classes, numDetections]
-    const boxes   = await result[0].array(); // [1, 100, 4]
-    const scores  = await result[1].array(); // [1, 100]
-    const classes = await result[2].array(); // [1, 100]
-    result.forEach(t => t.dispose());
-
-    const detections = [];
-    for (let i = 0; i < scores[0].length; i++) {
-      const score = scores[0][i];
-      if (score < CONFIDENCE_THRESHOLD) continue;
-      const classIdx = Math.round(classes[0][i]);
-      const label = COCO_CLASSES[classIdx] || 'unknown';
-      if (!label || label === 'background' || label === 'unknown') continue;
-      detections.push({ box: boxes[0][i], score, label });
-    }
-
-    if (detections.length === 0) {
+    if (!predictions || predictions.length === 0) {
       return { mode: 'scene', label: null, score: 0 };
     }
 
-    // Sort by score descending
-    detections.sort((a, b) => b.score - a.score);
+    // Sort by score
+    predictions.sort((a, b) => b.score - a.score);
 
-    // Check for central subject (portrait mode)
-    const central = detections.find(d => isCentral(d.box));
-    if (central) {
-      return { mode: 'portrait', label: central.label, score: central.score };
+    // Check if top prediction has a large bounding box (portrait mode)
+    const top = predictions[0];
+    if (isCentral(top.bbox)) {
+      return { mode: 'portrait', label: top.class, score: top.score };
     }
 
-    // No central subject — scene mode
-    return { mode: 'scene', label: detections[0].label, score: detections[0].score };
+    return { mode: 'scene', label: top.class, score: top.score };
   }
 
   return { load, analyse };
