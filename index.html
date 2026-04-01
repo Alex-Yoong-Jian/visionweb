@@ -61,6 +61,47 @@
     #screen-error { background: #fff; gap: 16px; padding: 2rem; text-align: center; }
     .error-title { font-size: 20px; font-weight: 600; color: #c0392b; }
     .error-msg { font-size: 15px; color: #666; max-width: 300px; line-height: 1.6; }
+
+    /* ── Limit screen ── */
+    #screen-limit { background: #fff; gap: 16px; padding: 2rem; text-align: center; }
+    .limit-icon  { font-size: 48px; }
+    .limit-title { font-size: 22px; font-weight: 600; color: #1F4E79; }
+    .limit-msg   { font-size: 15px; color: #444; max-width: 300px; line-height: 1.7; }
+    .limit-sub   { font-size: 13px; color: #aaa; max-width: 300px; line-height: 1.7; }
+
+    /* ── Scan info on result screen ── */
+    .result-scan-info { font-size: 12px; color: #aaa; text-align: center; }
+
+    /* ── Unlock bar: fixed at bottom, always visible ── */
+    #unlock-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid #eee;
+      padding: 10px 16px 14px;
+      display: flex; flex-direction: column; gap: 6px;
+      z-index: 100;
+    }
+    #unlock-bar input {
+      width: 100%; padding: 9px 12px; border: 1px solid #ddd;
+      border-radius: 8px; font-size: 14px; color: #333;
+      background: #fff; outline: none;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    #unlock-bar input:focus   { border-color: #1F4E79; }
+    #unlock-bar input.verified { border-color: #1D6A3A; border-width: 2px; box-shadow: 0 0 0 3px rgba(29,106,58,0.15); transition: border-color 0.3s, box-shadow 0.3s; }
+    #unlock-btn {
+      width: 100%; padding: 10px; background: #1F4E79; color: #fff;
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    #unlock-btn:active { background: #163c5e; }
+    #unlock-msg { font-size: 12px; color: #888; text-align: center; min-height: 16px; }
+    #unlock-msg.success { color: #1D6A3A; }
+    #unlock-msg.error   { color: #c0392b; }
+
+    /* Push screens up so unlock bar doesn't overlap content */
+    .screen { padding-bottom: 110px; }
   </style>
 </head>
 <body>
@@ -116,12 +157,28 @@
     <div class="result-divider"></div>
     <div class="result-text-en" id="result-text-en">—</div>
     <div class="result-text-my" id="result-text-my">—</div>
+    <div class="result-scan-info" id="result-scan-info"></div>
     <div class="result-prompt">Hold anywhere to scan again</div>
   </div>
 
   <div class="screen hidden" id="screen-error">
     <div class="error-title">Something went wrong</div>
     <div class="error-msg" id="error-msg">Please reload the page and try again.</div>
+  </div>
+
+  <!-- SCREEN: LIMIT REACHED -->
+  <div class="screen hidden" id="screen-limit">
+    <div class="limit-icon">⏳</div>
+    <div class="limit-title">Weekly limit reached</div>
+    <div class="limit-msg">You have used all 10 scans for this week.<br>Your limit resets every Monday.</div>
+    <div class="limit-sub">Had limu mingguan dicapai.<br>Had anda ditetapkan semula setiap hari Isnin.</div>
+  </div>
+
+  <!-- UNLOCK INPUT: fixed at bottom, always visible -->
+  <div id="unlock-bar">
+    <input type="email" id="unlock-input" placeholder="Enter email to unlock unlimited scans" autocomplete="email" />
+    <button id="unlock-btn">Unlock</button>
+    <div id="unlock-msg"></div>
   </div>
 
 <script>
@@ -189,7 +246,7 @@ const TickSound = (() => {
    MODULE: SCREEN MANAGER
 ═══════════════════════════════════════════════════════ */
 const ScreenManager = (() => {
-  const ids = ['loading','prompt','camera','result','error'];
+  const ids = ['loading','prompt','camera','result','error','limit'];
   const map = {};
   ids.forEach(id => map[id] = document.getElementById('screen-' + id));
   function show(name) {
@@ -393,11 +450,22 @@ const HoldDetection = (() => {
 ═══════════════════════════════════════════════════════ */
 const Detector = (() => {
   async function analyse(base64Image) {
+    // Include unlock token if stored in localStorage
+    const token = localStorage.getItem('visionweb_token') || undefined;
+
     const resp = await fetch('/api/detect', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ image: base64Image })
+      body:    JSON.stringify({ image: base64Image, token })
     });
+
+    // 429 = weekly limit reached
+    if (resp.status === 429) {
+      const err = await resp.json().catch(() => ({}));
+      const limitErr = new Error(err.error || 'Weekly limit reached');
+      limitErr.isLimitReached = true;
+      throw limitErr;
+    }
 
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
@@ -416,8 +484,6 @@ const Detector = (() => {
    Builds bilingual sentences from the detection result.
 ═══════════════════════════════════════════════════════ */
 const ResultBuilder = (() => {
-  // Claude already returns natural noun phrases in both EN and MY.
-  // We just wrap them in a consistent sentence structure.
   function build(result) {
     if (!result.description) {
       return {
@@ -425,30 +491,13 @@ const ResultBuilder = (() => {
         my: 'Saya tidak dapat mengenal pasti dengan jelas. Sila cuba semula dengan pencahayaan yang lebih baik.'
       };
     }
-
     const en = result.description;
     const my = result.descriptionMY || result.description;
-
     if (result.mode === 'portrait') {
-      return {
-        en: `I can see ${en}.`,
-        my: `Saya nampak ${my}.`
-      };
+      return { en: `I can see ${en}.`, my: `Saya nampak ${my}.` };
     }
-
-    if (result.mode === 'scene') {
-      return {
-        en: `This appears to be ${en}.`,
-        my: `Ini kelihatan seperti ${my}.`
-      };
-    }
-
-    return {
-      en: 'I could not clearly identify what is in view. Please try again with better lighting.',
-      my: 'Saya tidak dapat mengenal pasti dengan jelas. Sila cuba semula dengan pencahayaan yang lebih baik.'
-    };
+    return { en: `This appears to be ${en}.`, my: `Ini kelihatan seperti ${my}.` };
   }
-
   return { build };
 })();
 
@@ -551,21 +600,31 @@ const App = (() => {
 
       document.getElementById('scan-spinner').classList.remove('visible');
       ResultDisplay.show(result.mode, sentences.en, sentences.my, result.score);
+
+      // Show scan usage info (hidden for unlimited users)
+      const scanInfoEl = document.getElementById('result-scan-info');
+      if (result.isUnlimited) {
+        scanInfoEl.textContent = 'Unlimited access';
+      } else if (result.scansRemaining !== undefined) {
+        const rem = result.scansRemaining;
+        scanInfoEl.textContent = rem === 0
+          ? 'No scans remaining this week'
+          : `${rem} scan${rem === 1 ? '' : 's'} remaining this week`;
+      }
+
       ScreenManager.show('result');
       state = 'result';
 
-      // 1. Speak the detection result
+      // Speak the result
       await Audio.speak(sentences.en, sentences.my);
 
-      // 2. Then explicitly prompt the user to hold again
-      //    Critical for visually impaired users — they need to know
-      //    the app is done and is waiting for their next action
+      // Tell user to hold again — critical for visually impaired
       await Audio.speak(
         'Hold anywhere to scan again.',
         'Tahan di mana-mana untuk mengimbas semula.'
       );
 
-      // 3. Now listen for the next hold
+      // Listen for next hold
       const resultEl = document.getElementById('screen-result');
       function onResultHold() {
         resultEl.removeEventListener('mousedown',  onResultHold);
@@ -578,6 +637,18 @@ const App = (() => {
     } catch (err) {
       console.error('Detection error:', err.name, err.message);
       document.getElementById('scan-spinner').classList.remove('visible');
+
+      // Handle weekly limit specifically
+      if (err.isLimitReached) {
+        ScreenManager.show('limit');
+        state = 'limit';
+        await Audio.speak(
+          'You have reached your weekly scan limit of 10 scans. Your limit resets every Monday.',
+          'Anda telah mencapai had imbasan mingguan 10 imbasan. Had anda ditetapkan semula setiap Isnin.'
+        );
+        return;
+      }
+
       showError('Detection failed: ' + (err.message || err.name) + '. Please reload.');
     }
   }
@@ -608,7 +679,85 @@ const App = (() => {
   return { init };
 })();
 
-window.addEventListener('DOMContentLoaded', () => App.init());
+/* ═══════════════════════════════════════════════════════
+   MODULE: UNLOCK MANAGER
+   Handles the email unlock bar at the bottom of the screen.
+   On submit: calls /api/unlock, stores token in localStorage.
+═══════════════════════════════════════════════════════ */
+const UnlockManager = (() => {
+  const STORAGE_KEY = 'visionweb_token';
+
+  function init() {
+    const btn   = document.getElementById('unlock-btn');
+    const input = document.getElementById('unlock-input');
+    const msg   = document.getElementById('unlock-msg');
+
+    // If already unlocked, show status
+    if (localStorage.getItem(STORAGE_KEY)) {
+      msg.textContent = '✓ Unlimited access active';
+      msg.className   = 'success';
+      input.value     = '';
+      input.placeholder = 'Unlimited access active';
+      input.disabled  = true;
+      input.classList.add('verified');  // green border on reload too
+      btn.disabled    = true;
+      btn.textContent = 'Unlocked';
+    }
+
+    btn.addEventListener('click', () => attemptUnlock(input, msg));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') attemptUnlock(input, msg);
+    });
+  }
+
+  async function attemptUnlock(input, msg) {
+    const email = input.value.trim();
+    if (!email) return;
+
+    msg.textContent = 'Verifying…';
+    msg.className   = '';
+
+    try {
+      const resp = await fetch('/api/unlock', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email })
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok || !data.token) {
+        msg.textContent = data.error || 'Email not recognised';
+        msg.className   = 'error';
+        input.classList.remove('verified'); // no green — don't hint on failure
+        return;
+      }
+
+      // Store token
+      localStorage.setItem(STORAGE_KEY, data.token);
+      msg.textContent   = '✓ Unlimited access unlocked!';
+      msg.className     = 'success';
+      input.value       = '';
+      input.placeholder = 'Unlimited access active';
+      input.disabled    = true;
+      input.classList.add('verified');       // green border highlight
+      const btn         = document.getElementById('unlock-btn');
+      btn.disabled      = true;
+      btn.textContent   = 'Unlocked';
+
+    } catch {
+      msg.textContent = 'Connection error. Please try again.';
+      msg.className   = 'error';
+    }
+  }
+
+  return { init };
+})();
+
+window.addEventListener('DOMContentLoaded', () => {
+  UnlockManager.init();
+  App.init();
+});
 </script>
 </body>
 </html>
