@@ -4,27 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; media-src mediastream: blob:; connect-src 'none';" />
+    content="default-src 'self';
+             script-src 'unsafe-inline' https://cdn.jsdelivr.net;
+             style-src 'unsafe-inline';
+             media-src mediastream: blob:;
+             connect-src https://storage.googleapis.com;" />
   <title>VisionWeb</title>
   <style>
-    /* ── Reset & Base ── */
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #111; }
-
-    /* ── Prevent all default interactions ── */
     body { user-select: none; -webkit-user-select: none; touch-action: none; }
 
-    /* ── Screens ── */
     .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s ease; }
     .screen.hidden { opacity: 0; pointer-events: none; }
 
-    /* ── Loading Screen ── */
+    /* ── Loading ── */
     #screen-loading { background: #fff; gap: 24px; }
     .loader-ring { width: 48px; height: 48px; border: 3px solid #eee; border-top-color: #1F4E79; border-radius: 50%; animation: spin 0.9s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loader-text { font-size: 15px; color: #888; letter-spacing: 0.04em; }
+    .loader-text { font-size: 15px; color: #888; letter-spacing: 0.04em; text-align: center; }
+    .loader-sub  { font-size: 12px; color: #bbb; margin-top: 4px; text-align: center; }
 
-    /* ── Prompt Screen ── */
+    /* ── Prompt ── */
     #screen-prompt { background: #fff; gap: 32px; padding: 2rem; }
     .app-name { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; color: #1F4E79; text-transform: uppercase; }
     .prompt-icon { width: 72px; height: 72px; border-radius: 50%; background: #F0F4F8; display: flex; align-items: center; justify-content: center; }
@@ -33,14 +34,12 @@
     .prompt-text-my { font-size: 18px; font-weight: 400; color: #666; text-align: center; line-height: 1.4; }
     .prompt-hint { font-size: 13px; color: #aaa; text-align: center; margin-top: 8px; }
 
-    /* ── Camera Screen ── */
+    /* ── Camera / scanning combined ── */
     #screen-camera { background: #000; }
     #camera-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-
-    /* ── Camera overlay elements ── */
     .cam-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
-    /* Centre reticle */
+    /* Reticle corners */
     .reticle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 180px; height: 180px; }
     .reticle-corner { position: absolute; width: 24px; height: 24px; border-color: rgba(255,255,255,0.8); border-style: solid; }
     .reticle-corner.tl { top: 0; left: 0; border-width: 2px 0 0 2px; }
@@ -52,26 +51,32 @@
     .progress-wrap { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; }
     .progress-svg { width: 220px; height: 220px; transform: rotate(-90deg); }
     .progress-track { fill: none; stroke: rgba(255,255,255,0.15); stroke-width: 3; }
-    .progress-fill { fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 628; stroke-dashoffset: 628; transition: stroke-dashoffset 0.1s linear; }
+    .progress-fill  { fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 628; stroke-dashoffset: 628; transition: stroke-dashoffset 0.1s linear; }
 
-    /* Hold instruction at bottom */
+    /* Status + instruction */
+    .cam-status { position: absolute; top: 48px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.45); backdrop-filter: blur(8px); border: 0.5px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 16px; font-size: 13px; color: rgba(255,255,255,0.8); white-space: nowrap; }
     .cam-instruction { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); text-align: center; }
     .cam-instruction-en { font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.9); }
     .cam-instruction-my { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 4px; }
 
-    /* Status badge top */
-    .cam-status { position: absolute; top: 48px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.45); backdrop-filter: blur(8px); border: 0.5px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 16px; font-size: 13px; color: rgba(255,255,255,0.8); white-space: nowrap; transition: opacity 0.3s; }
+    /* Scanning spinner (shown on top of camera during AI analysis) */
+    .scan-spinner-wrap { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .scan-spinner-wrap.visible { opacity: 1; }
+    .scan-spinner { width: 56px; height: 56px; border: 3px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.9s linear infinite; }
+    .scan-text-en { font-size: 16px; font-weight: 500; color: #fff; }
+    .scan-text-my { font-size: 13px; color: rgba(255,255,255,0.6); }
 
-    /* ── Result Screen ── */
+    /* ── Result ── */
     #screen-result { background: #fff; gap: 20px; padding: 2.5rem; }
     .result-label { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #1F4E79; text-transform: uppercase; }
     .result-mode-badge { padding: 4px 14px; border-radius: 12px; font-size: 12px; font-weight: 500; border: 1px solid #ddd; color: #555; }
+    .result-confidence { font-size: 12px; color: #aaa; }
     .result-text-en { font-size: 22px; font-weight: 600; color: #111; text-align: center; line-height: 1.4; max-width: 340px; }
     .result-text-my { font-size: 16px; color: #666; text-align: center; line-height: 1.5; max-width: 340px; }
     .result-again { font-size: 13px; color: #aaa; text-align: center; margin-top: 12px; }
     .result-divider { width: 40px; height: 2px; background: #eee; border-radius: 1px; }
 
-    /* ── Error Screen ── */
+    /* ── Error ── */
     #screen-error { background: #fff; gap: 16px; padding: 2rem; text-align: center; }
     .error-title { font-size: 20px; font-weight: 600; color: #c0392b; }
     .error-msg { font-size: 15px; color: #666; max-width: 300px; line-height: 1.6; }
@@ -79,32 +84,33 @@
 </head>
 <body>
 
-  <!-- ═══════════ SCREEN: LOADING ═══════════ -->
+  <!-- SCREEN: LOADING -->
   <div class="screen" id="screen-loading">
     <div class="loader-ring"></div>
     <div class="loader-text">Starting VisionWeb…</div>
+    <div class="loader-sub" id="loader-sub">Loading AI model…</div>
   </div>
 
-  <!-- ═══════════ SCREEN: PROMPT ═══════════ -->
+  <!-- SCREEN: PROMPT -->
   <div class="screen hidden" id="screen-prompt">
     <div class="app-name">VisionWeb</div>
     <div class="prompt-icon">
       <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><circle cx="12" cy="12" r="3"/></svg>
     </div>
-    <div class="prompt-text-en">Hold the screen<br>to start</div>
-    <div class="prompt-text-my">Tahan skrin<br>untuk mula</div>
-    <div class="prompt-hint">Hold anywhere on the screen for 3.5 seconds</div>
+    <div class="prompt-text-en">Hold the screen<br>to scan</div>
+    <div class="prompt-text-my">Tahan skrin<br>untuk mengimbas</div>
+    <div class="prompt-hint">Hold anywhere for 3.5 seconds</div>
   </div>
 
-  <!-- ═══════════ SCREEN: CAMERA ═══════════ -->
+  <!-- SCREEN: CAMERA (holds during scanning too) -->
   <div class="screen hidden" id="screen-camera">
     <video id="camera-video" autoplay playsinline muted></video>
     <div class="cam-overlay">
-      <div class="cam-status" id="cam-status">Camera ready</div>
+      <div class="cam-status" id="cam-status">Hold to scan</div>
       <div class="progress-wrap">
         <svg class="progress-svg" viewBox="0 0 220 220">
           <circle class="progress-track" cx="110" cy="110" r="100"/>
-          <circle class="progress-fill" id="progress-ring" cx="110" cy="110" r="100"/>
+          <circle class="progress-fill"  id="progress-ring" cx="110" cy="110" r="100"/>
         </svg>
       </div>
       <div class="reticle">
@@ -114,48 +120,153 @@
         <div class="reticle-corner br"></div>
       </div>
       <div class="cam-instruction">
-        <div class="cam-instruction-en" id="cam-instruction-en">Hold to scan</div>
-        <div class="cam-instruction-my" id="cam-instruction-my">Tahan untuk imbas</div>
+        <div class="cam-instruction-en" id="cam-instruction-en">Hold anywhere to scan</div>
+        <div class="cam-instruction-my" id="cam-instruction-my">Tahan di mana-mana untuk mengimbas</div>
+      </div>
+      <!-- Scanning spinner overlay — shown during AI analysis -->
+      <div class="scan-spinner-wrap" id="scan-spinner">
+        <div class="scan-spinner"></div>
+        <div class="scan-text-en">Analysing…</div>
+        <div class="scan-text-my">Sedang menganalisis…</div>
       </div>
     </div>
   </div>
 
-  <!-- ═══════════ SCREEN: RESULT ═══════════ -->
+  <!-- SCREEN: RESULT -->
   <div class="screen hidden" id="screen-result">
     <div class="result-label">Detected</div>
-    <div class="result-mode-badge" id="result-mode">Portrait mode</div>
+    <div class="result-mode-badge" id="result-mode">—</div>
+    <div class="result-confidence" id="result-confidence"></div>
     <div class="result-divider"></div>
     <div class="result-text-en" id="result-text-en">—</div>
     <div class="result-text-my" id="result-text-my">—</div>
     <div class="result-again">Hold anywhere to scan again</div>
   </div>
 
-  <!-- ═══════════ SCREEN: ERROR ═══════════ -->
+  <!-- SCREEN: ERROR -->
   <div class="screen hidden" id="screen-error">
-    <div class="error-title">Camera unavailable</div>
-    <div class="error-msg" id="error-msg">Please allow camera access and reload the page.</div>
+    <div class="error-title">Something went wrong</div>
+    <div class="error-msg" id="error-msg">Please reload the page and try again.</div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
 <script>
 'use strict';
 
 /* ═══════════════════════════════════════════════════════
-   MODULE: SCREEN MANAGER
-   Handles showing and hiding screens
+   MODULE: TICK SOUND
+   Generates a Japanese pedestrian crossing-style
+   rhythmic beep using Web Audio API — no external file
+   needed. Steady, calm, accessible.
+   Exposes: TickSound.start(), TickSound.stop()
 ═══════════════════════════════════════════════════════ */
-const ScreenManager = (() => {
-  const screens = {
-    loading: document.getElementById('screen-loading'),
-    prompt:  document.getElementById('screen-prompt'),
-    camera:  document.getElementById('screen-camera'),
-    result:  document.getElementById('screen-result'),
-    error:   document.getElementById('screen-error'),
+const TickSound = (() => {
+  let ctx        = null;
+  let tickTimer  = null;
+  let isRunning  = false;
+
+  function getCtx() {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    return ctx;
+  }
+
+  function playBeep() {
+    const ac       = getCtx();
+    const osc      = ac.createOscillator();
+    const gainNode = ac.createGain();
+
+    osc.connect(gainNode);
+    gainNode.connect(ac.destination);
+
+    // Frequency: 880 Hz — clear, pleasant, similar to Japanese crossing signal
+    osc.type      = 'sine';
+    osc.frequency.setValueAtTime(880, ac.currentTime);
+
+    // Envelope: quick fade in, short sustain, quick fade out — avoids harsh click
+    gainNode.gain.setValueAtTime(0, ac.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.25, ac.currentTime + 0.02);
+    gainNode.gain.linearRampToValueAtTime(0.18, ac.currentTime + 0.08);
+    gainNode.gain.linearRampToValueAtTime(0,    ac.currentTime + 0.18);
+
+    osc.start(ac.currentTime);
+    osc.stop(ac.currentTime + 0.18);
+  }
+
+  function start() {
+    if (isRunning) return;
+    isRunning = true;
+    playBeep(); // immediate first beep
+    tickTimer = setInterval(playBeep, 500); // beep every 500ms
+  }
+
+  function stop() {
+    isRunning = false;
+    clearInterval(tickTimer);
+    tickTimer = null;
+  }
+
+  return { start, stop };
+})();
+
+
+/* ═══════════════════════════════════════════════════════
+   MODULE: TRANSLATIONS
+   Maps all 80 COCO-SSD class labels to Malay
+═══════════════════════════════════════════════════════ */
+const Translations = (() => {
+  const EN_TO_MY = {
+    'person':'orang','bicycle':'basikal','car':'kereta','motorcycle':'motosikal',
+    'airplane':'kapal terbang','bus':'bas','train':'kereta api','truck':'trak',
+    'boat':'bot','traffic light':'lampu isyarat','fire hydrant':'hidrант kebakaran',
+    'stop sign':'papan tanda berhenti','parking meter':'meter parkir','bench':'bangku',
+    'bird':'burung','cat':'kucing','dog':'anjing','horse':'kuda','sheep':'biri-biri',
+    'cow':'lembu','elephant':'gajah','bear':'beruang','zebra':'zebra','giraffe':'zirafah',
+    'backpack':'beg galas','umbrella':'payung','handbag':'beg tangan','tie':'tali leher',
+    'suitcase':'beg pakaian','frisbee':'frisbee','skis':'ski','snowboard':'papan salji',
+    'sports ball':'bola sukan','kite':'layang-layang','baseball bat':'kayu baseball',
+    'baseball glove':'sarung tangan baseball','skateboard':'papan luncur',
+    'surfboard':'papan selaju','tennis racket':'raket tenis','bottle':'botol',
+    'wine glass':'gelas wain','cup':'cawan','fork':'garpu','knife':'pisau',
+    'spoon':'sudu','bowl':'mangkuk','banana':'pisang','apple':'epal',
+    'sandwich':'sandwic','orange':'oren','broccoli':'brokoli','carrot':'lobak merah',
+    'hot dog':'hot dog','pizza':'piza','donut':'donat','cake':'kek','chair':'kerusi',
+    'couch':'sofa','potted plant':'pokok dalam pasu','bed':'katil',
+    'dining table':'meja makan','toilet':'tandas','tv':'televisyen',
+    'laptop':'komputer riba','mouse':'tetikus','remote':'alat kawalan jauh',
+    'keyboard':'papan kekunci','cell phone':'telefon bimbit',
+    'microwave':'ketuhar gelombang mikro','oven':'ketuhar','toaster':'pembakar roti',
+    'sink':'sinki','refrigerator':'peti sejuk','book':'buku','clock':'jam',
+    'vase':'pasu bunga','scissors':'gunting','teddy bear':'teddy bear',
+    'hair drier':'pengering rambut','toothbrush':'berus gigi',
   };
 
+  function toMalay(label) { return EN_TO_MY[label.toLowerCase()] || label; }
+
+  function buildSentenceEN(label, isPerson) {
+    if (isPerson) return 'I can see a person in front of the camera.';
+    const article = ['a','e','i','o','u'].includes(label[0].toLowerCase()) ? 'an' : 'a';
+    return `I can see ${article} ${label}.`;
+  }
+
+  function buildSentenceMY(label) {
+    return `Saya nampak ${toMalay(label)}.`;
+  }
+
+  return { toMalay, buildSentenceEN, buildSentenceMY };
+})();
+
+
+/* ═══════════════════════════════════════════════════════
+   MODULE: SCREEN MANAGER
+═══════════════════════════════════════════════════════ */
+const ScreenManager = (() => {
+  const ids = ['loading','prompt','camera','result','error'];
+  const map = {};
+  ids.forEach(id => map[id] = document.getElementById('screen-' + id));
+
   function show(name) {
-    Object.entries(screens).forEach(([key, el]) => {
-      el.classList.toggle('hidden', key !== name);
-    });
+    ids.forEach(id => map[id].classList.toggle('hidden', id !== name));
   }
 
   return { show };
@@ -164,34 +275,29 @@ const ScreenManager = (() => {
 
 /* ═══════════════════════════════════════════════════════
    MODULE: AUDIO
-   Handles all speech synthesis — bilingual (EN + MY)
-   Exposes: Audio.speak(en, my), Audio.prompt()
+   Bilingual speech synthesis (EN + Malay)
 ═══════════════════════════════════════════════════════ */
 const Audio = (() => {
   const synth = window.speechSynthesis;
-  let voices = [];
+  let voices  = [];
 
-  function loadVoices() {
-    voices = synth.getVoices();
-  }
+  function loadVoices() { voices = synth.getVoices(); }
   loadVoices();
   if (speechSynthesis.onvoiceschanged !== undefined) {
     speechSynthesis.onvoiceschanged = loadVoices;
   }
 
-  function findVoice(lang) {
-    return voices.find(v => v.lang.startsWith(lang)) || null;
-  }
+  function findVoice(lang) { return voices.find(v => v.lang.startsWith(lang)) || null; }
 
   function speakLine(text, lang, rate = 0.95) {
     return new Promise(resolve => {
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.lang = lang;
-      utt.rate = rate;
-      utt.pitch = 1;
+      const utt   = new SpeechSynthesisUtterance(text);
+      utt.lang    = lang;
+      utt.rate    = rate;
+      utt.pitch   = 1;
       const voice = findVoice(lang);
       if (voice) utt.voice = voice;
-      utt.onend = resolve;
+      utt.onend   = resolve;
       utt.onerror = resolve;
       synth.speak(utt);
     });
@@ -204,10 +310,7 @@ const Audio = (() => {
   }
 
   async function prompt() {
-    await speak(
-      'Hold the screen to start.',
-      'Tahan skrin untuk mula.'
-    );
+    await speak('Hold the screen to scan.', 'Tahan skrin untuk mengimbas.');
   }
 
   return { speak, prompt };
@@ -216,12 +319,10 @@ const Audio = (() => {
 
 /* ═══════════════════════════════════════════════════════
    MODULE: CAMERA
-   Handles camera stream start and stop
-   Exposes: Camera.start(), Camera.stop(), Camera.capture()
 ═══════════════════════════════════════════════════════ */
 const Camera = (() => {
   const video = document.getElementById('camera-video');
-  let stream = null;
+  let stream  = null;
 
   async function start() {
     stream = await navigator.mediaDevices.getUserMedia({
@@ -229,7 +330,7 @@ const Camera = (() => {
       audio: false
     });
     video.srcObject = stream;
-    await new Promise(resolve => video.onloadedmetadata = resolve);
+    await new Promise(resolve => { video.onloadedmetadata = resolve; });
   }
 
   function stop() {
@@ -241,7 +342,7 @@ const Camera = (() => {
   }
 
   function capture() {
-    const canvas = document.createElement('canvas');
+    const canvas  = document.createElement('canvas');
     canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
@@ -254,53 +355,62 @@ const Camera = (() => {
 
 /* ═══════════════════════════════════════════════════════
    MODULE: HOLD DETECTION
-   3.5 second hold timer with progress ring
-   Fires onComplete when hold is sustained
-   Fires onRelease if user releases early
-   Exposes: HoldDetection.init(onComplete, onRelease)
+   Fixed flow: hold → camera already open → detect automatically
+   No second hold required. Rate limiting: 3s cooldown.
 ═══════════════════════════════════════════════════════ */
 const HoldDetection = (() => {
-  const HOLD_MS    = 3500;
-  const CIRCUMFERENCE = 2 * Math.PI * 100; // r=100 matches SVG
-  const ring       = document.getElementById('progress-ring');
-  const statusEl   = document.getElementById('cam-status');
-  const instrEN    = document.getElementById('cam-instruction-en');
-  const instrMY    = document.getElementById('cam-instruction-my');
+  const HOLD_MS      = 3500;
+  const COOLDOWN_MS  = 3000;
+  const CIRCUMFERENCE = 2 * Math.PI * 100;
 
-  let holdTimer    = null;
-  let startTime    = null;
-  let rafId        = null;
-  let isHolding    = false;
-  let onComplete   = null;
-  let onRelease    = null;
+  const ring     = document.getElementById('progress-ring');
+  const statusEl = document.getElementById('cam-status');
+  const instrEN  = document.getElementById('cam-instruction-en');
+  const instrMY  = document.getElementById('cam-instruction-my');
+
+  let holdTimer  = null;
+  let startTime  = null;
+  let rafId      = null;
+  let isHolding  = false;
+  let lastScanAt = 0;
+  let onComplete = null;
+  let enabled    = false;
 
   function setStatus(msg) { statusEl.textContent = msg; }
-
-  function setProgress(pct) {
-    const offset = CIRCUMFERENCE * (1 - pct);
-    ring.style.strokeDashoffset = offset;
-  }
+  function setProgress(pct) { ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - pct); }
 
   function tick() {
-    const elapsed = Date.now() - startTime;
-    const pct = Math.min(elapsed / HOLD_MS, 1);
+    const pct = Math.min((Date.now() - startTime) / HOLD_MS, 1);
     setProgress(pct);
-    if (pct < 1) {
-      rafId = requestAnimationFrame(tick);
-    }
+    if (pct < 1) rafId = requestAnimationFrame(tick);
   }
 
   function startHold() {
-    if (isHolding) return;
+    if (!enabled || isHolding) return;
+
+    const sinceLastScan = Date.now() - lastScanAt;
+    if (sinceLastScan < COOLDOWN_MS) {
+      const remaining = Math.ceil((COOLDOWN_MS - sinceLastScan) / 1000);
+      setStatus(`Please wait ${remaining}s… / Sila tunggu ${remaining}s…`);
+      return;
+    }
+
     isHolding = true;
     startTime = Date.now();
-    setStatus('Hold steady…  /  Tahan…');
+    setStatus('Hold steady… / Tahan…');
     instrEN.textContent = 'Keep holding…';
     instrMY.textContent = 'Teruskan tahan…';
+    setProgress(0);
+
+    // Start ticking sound
+    TickSound.start();
+
     rafId = requestAnimationFrame(tick);
     holdTimer = setTimeout(() => {
       cancelAnimationFrame(rafId);
+      TickSound.stop();
       setProgress(1);
+      lastScanAt = Date.now();
       if (onComplete) onComplete();
     }, HOLD_MS);
   }
@@ -310,51 +420,88 @@ const HoldDetection = (() => {
     isHolding = false;
     clearTimeout(holdTimer);
     cancelAnimationFrame(rafId);
+    TickSound.stop();
     setProgress(0);
-    setStatus('Camera ready');
-    instrEN.textContent = 'Hold to scan';
-    instrMY.textContent = 'Tahan untuk imbas';
-    if (onRelease) onRelease();
+    setStatus('Hold to scan');
+    instrEN.textContent = 'Hold anywhere to scan';
+    instrMY.textContent = 'Tahan di mana-mana untuk mengimbas';
   }
 
-  function init(completeFn, releaseFn) {
+  function init(completeFn) {
     onComplete = completeFn;
-    onRelease  = releaseFn;
-
-    const el = document.getElementById('screen-camera');
-
-    el.addEventListener('mousedown',  () => startHold());
-    el.addEventListener('mouseup',    () => endHold());
-    el.addEventListener('mouseleave', () => endHold());
-    el.addEventListener('touchstart', (e) => { e.preventDefault(); startHold(); }, { passive: false });
-    el.addEventListener('touchend',   (e) => { e.preventDefault(); endHold(); },   { passive: false });
-    el.addEventListener('touchcancel',(e) => { e.preventDefault(); endHold(); },   { passive: false });
+    const el   = document.getElementById('screen-camera');
+    el.addEventListener('mousedown',   () => startHold());
+    el.addEventListener('mouseup',     () => endHold());
+    el.addEventListener('mouseleave',  () => endHold());
+    el.addEventListener('touchstart',  (e) => { e.preventDefault(); startHold(); }, { passive: false });
+    el.addEventListener('touchend',    (e) => { e.preventDefault(); endHold(); },   { passive: false });
+    el.addEventListener('touchcancel', (e) => { e.preventDefault(); endHold(); },   { passive: false });
   }
 
-  function reset() {
-    isHolding = false;
-    clearTimeout(holdTimer);
-    cancelAnimationFrame(rafId);
-    setProgress(0);
-    setStatus('Camera ready');
-    instrEN.textContent = 'Hold to scan';
-    instrMY.textContent = 'Tahan untuk imbas';
+  function enable()  { enabled = true;  setStatus('Hold to scan'); setProgress(0); instrEN.textContent = 'Hold anywhere to scan'; instrMY.textContent = 'Tahan di mana-mana untuk mengimbas'; }
+  function disable() { enabled = false; TickSound.stop(); endHold(); }
+
+  return { init, enable, disable };
+})();
+
+
+/* ═══════════════════════════════════════════════════════
+   MODULE: DETECTOR
+   COCO-SSD detection + portrait vs scene classification
+═══════════════════════════════════════════════════════ */
+const Detector = (() => {
+  let model = null;
+  const CONFIDENCE_THRESHOLD = 0.60;
+  const CENTRE_COVERAGE_MIN  = 0.20;
+
+  async function load() {
+    model = await cocoSsd.load({ base: 'mobilenet_v2' });
   }
 
-  return { init, reset };
+  function isCentral(bbox, imgW, imgH) {
+    const [x, y, w, h] = bbox;
+    const coverage = (w * h) / (imgW * imgH);
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+    return coverage >= CENTRE_COVERAGE_MIN &&
+           cx > imgW * 0.25 && cx < imgW * 0.75 &&
+           cy > imgH * 0.25 && cy < imgH * 0.75;
+  }
+
+  async function analyse(canvas) {
+    if (!model) throw new Error('Model not loaded');
+    const predictions = await model.detect(canvas);
+    const W = canvas.width;
+    const H = canvas.height;
+    const confident = predictions.filter(p => p.score >= CONFIDENCE_THRESHOLD);
+
+    if (confident.length === 0) {
+      return { mode: 'scene', label: null, score: 0 };
+    }
+
+    const central = confident.find(p => isCentral(p.bbox, W, H));
+    if (central) {
+      return { mode: 'portrait', label: central.class, score: central.score };
+    }
+
+    return { mode: 'scene', label: confident[0].class, score: confident[0].score };
+  }
+
+  return { load, analyse };
 })();
 
 
 /* ═══════════════════════════════════════════════════════
    MODULE: RESULT DISPLAY
-   Shows the detection result on screen
-   Exposes: ResultDisplay.show(mode, en, my)
 ═══════════════════════════════════════════════════════ */
 const ResultDisplay = (() => {
-  function show(mode, en, my) {
-    document.getElementById('result-mode').textContent    = mode;
-    document.getElementById('result-text-en').textContent = en;
-    document.getElementById('result-text-my').textContent = my;
+  function show({ mode, label, score, sentenceEN, sentenceMY }) {
+    const modeLabel  = mode === 'portrait' ? 'Portrait mode — Object detected' : 'Scene mode — Environment detected';
+    const confidence = score > 0 ? `${Math.round(score * 100)}% confidence` : '';
+    document.getElementById('result-mode').textContent       = modeLabel;
+    document.getElementById('result-confidence').textContent = confidence;
+    document.getElementById('result-text-en').textContent    = sentenceEN;
+    document.getElementById('result-text-my').textContent    = sentenceMY;
   }
   return { show };
 })();
@@ -362,138 +509,161 @@ const ResultDisplay = (() => {
 
 /* ═══════════════════════════════════════════════════════
    MODULE: APP CONTROLLER
-   Orchestrates all modules. State machine:
-   loading → prompt → camera → result → camera
+   Fixed flow:
+   loading → prompt (hold) → camera opens + hold detection
+   → 3.5s hold → detect → result → (hold) → camera again
 ═══════════════════════════════════════════════════════ */
 const App = (() => {
-  let state = 'loading'; // loading | prompt | camera | scanning | result
+  let state = 'loading';
 
   async function init() {
     ScreenManager.show('loading');
 
-    // Check for camera support
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      document.getElementById('error-msg').textContent =
-        'Your browser does not support camera access. Please use Chrome or Safari.';
-      ScreenManager.show('error');
+      showError('Your browser does not support camera access. Please use Chrome or Safari.');
       return;
     }
 
-    // Check for speech synthesis support
-    if (!window.speechSynthesis) {
-      console.warn('Speech synthesis not available on this device.');
+    try {
+      document.getElementById('loader-sub').textContent = 'Loading AI model… (this may take a few seconds)';
+      await Detector.load();
+      document.getElementById('loader-sub').textContent = 'AI model ready.';
+    } catch (err) {
+      console.error('Model load error:', err.name);
+      showError('Failed to load the AI model. Please check your connection and reload.');
+      return;
     }
 
-    // Simulate brief load for voice readiness
-    await new Promise(r => setTimeout(r, 800));
-
-    // Show prompt and play audio
-    ScreenManager.show('prompt');
-    state = 'prompt';
-
-    // Play initial bilingual prompt
-    Audio.prompt();
-
-    // Listen for hold on prompt screen to start camera
-    const promptEl = document.getElementById('screen-prompt');
-
-    function onPromptHold() {
-      promptEl.removeEventListener('mousedown',  onPromptHold);
-      promptEl.removeEventListener('touchstart', onPromptHold);
-      startCamera();
-    }
-
-    promptEl.addEventListener('mousedown',  onPromptHold);
-    promptEl.addEventListener('touchstart', onPromptHold, { passive: true });
+    await new Promise(r => setTimeout(r, 600));
+    showPrompt();
   }
 
-  async function startCamera() {
+  function showPrompt() {
+    ScreenManager.show('prompt');
+    state = 'prompt';
+    Audio.prompt();
+
+    // Single hold on prompt → open camera immediately + enable hold detection
+    const el = document.getElementById('screen-prompt');
+    function onHold() {
+      el.removeEventListener('mousedown',  onHold);
+      el.removeEventListener('touchstart', onHold);
+      openCameraAndListen();
+    }
+    el.addEventListener('mousedown',  onHold);
+    el.addEventListener('touchstart', onHold, { passive: true });
+  }
+
+  async function openCameraAndListen() {
+    // Open camera
     try {
       await Camera.start();
-      ScreenManager.show('camera');
-      state = 'camera';
-
-      // Initialise hold detection
-      HoldDetection.init(
-        onHoldComplete,  // 3.5s hold achieved
-        onHoldRelease    // released early
-      );
-
     } catch (err) {
       console.error('Camera error:', err.name);
-      document.getElementById('error-msg').textContent =
-        'Camera access was denied. Please allow camera access in your browser settings and reload.  /  Akses kamera ditolak. Sila benarkan akses kamera dan muat semula.';
-      ScreenManager.show('error');
+      showError(
+        'Camera access was denied. Please allow camera access in your browser settings and reload. / ' +
+        'Akses kamera ditolak. Sila benarkan akses kamera dan muat semula.'
+      );
+      return;
     }
+
+    // Switch to camera screen — hold detection now active
+    ScreenManager.show('camera');
+    state = 'camera';
+
+    // Initialise hold detection (only needs to be done once)
+    HoldDetection.init(onHoldComplete);
+    HoldDetection.enable();
+
+    await Audio.speak('Camera is ready. Hold to scan.', 'Kamera sedia. Tahan untuk mengimbas.');
   }
 
   async function onHoldComplete() {
     if (state !== 'camera') return;
     state = 'scanning';
 
-    // Capture the frame
+    // Disable further holds while processing
+    HoldDetection.disable();
+
+    // Capture frame — camera still live for a clean frame
     const frame = Camera.capture();
 
-    // Play capture audio cue
-    await Audio.speak(
-      'Scanning now.',
-      'Mengimbas sekarang.'
-    );
+    // Show scanning spinner over camera
+    document.getElementById('scan-spinner').classList.add('visible');
+    await Audio.speak('Analysing now.', 'Sedang menganalisis.');
 
-    // ── PHASE 1 PLACEHOLDER ──
-    // In Phase 2 we will pass `frame` to the detection modules.
-    // For now, show a placeholder result to confirm the flow works.
-    const placeholderEN = 'Detection coming in Phase 2. Camera and hold detection are working correctly.';
-    const placeholderMY = 'Pengesanan akan datang dalam Fasa 2. Kamera dan pengesan tahan berfungsi dengan betul.';
-
-    ResultDisplay.show('Phase 1 — Ready', placeholderEN, placeholderMY);
+    // Stop camera after capture
     Camera.stop();
-    ScreenManager.show('result');
-    state = 'result';
 
-    await Audio.speak(placeholderEN, placeholderMY);
+    try {
+      const result = await Detector.analyse(frame);
+      const isPerson = result.label === 'person';
 
-    // Listen for hold on result screen to scan again
-    const resultEl = document.getElementById('screen-result');
+      let sentenceEN, sentenceMY;
 
-    function onResultHold() {
-      resultEl.removeEventListener('mousedown',  onResultHold);
-      resultEl.removeEventListener('touchstart', onResultHold);
-      returnToPrompt();
+      if (result.mode === 'portrait' && result.label) {
+        sentenceEN = Translations.buildSentenceEN(result.label, isPerson);
+        sentenceMY = Translations.buildSentenceMY(result.label);
+      } else if (result.mode === 'scene' && result.label) {
+        sentenceEN = `This looks like a scene. I can also see ${result.label === 'person' ? 'people' : 'a ' + result.label} nearby.`;
+        sentenceMY = `Ini kelihatan seperti pemandangan. Saya juga nampak ${Translations.toMalay(result.label)} berhampiran.`;
+      } else {
+        sentenceEN = 'I could not clearly identify what is in view. Please try again with better lighting.';
+        sentenceMY = 'Saya tidak dapat mengenal pasti dengan jelas. Sila cuba semula dengan pencahayaan yang lebih baik.';
+      }
+
+      // Hide scanning spinner
+      document.getElementById('scan-spinner').classList.remove('visible');
+
+      ResultDisplay.show({ ...result, sentenceEN, sentenceMY });
+      ScreenManager.show('result');
+      state = 'result';
+
+      await Audio.speak(sentenceEN, sentenceMY);
+
+      // Listen for hold on result to scan again
+      const resultEl = document.getElementById('screen-result');
+      function onResultHold() {
+        resultEl.removeEventListener('mousedown',  onResultHold);
+        resultEl.removeEventListener('touchstart', onResultHold);
+        scanAgain();
+      }
+      resultEl.addEventListener('mousedown',  onResultHold);
+      resultEl.addEventListener('touchstart', onResultHold, { passive: true });
+
+    } catch (err) {
+      console.error('Detection error:', err.name);
+      document.getElementById('scan-spinner').classList.remove('visible');
+      showError('Detection failed. Please reload and try again.');
     }
-
-    resultEl.addEventListener('mousedown',  onResultHold);
-    resultEl.addEventListener('touchstart', onResultHold, { passive: true });
   }
 
-  function onHoldRelease() {
-    // User released before 3.5s — just reset, stay on camera screen
+  async function scanAgain() {
+    // Reopen camera and re-enable hold detection — no need to re-init
+    try {
+      await Camera.start();
+    } catch (err) {
+      console.error('Camera error:', err.name);
+      showError('Camera could not be reopened. Please reload.');
+      return;
+    }
+
+    ScreenManager.show('camera');
+    state = 'camera';
+    HoldDetection.enable();
+
+    await Audio.speak('Ready. Hold to scan again.', 'Sedia. Tahan untuk mengimbas semula.');
   }
 
-  async function returnToPrompt() {
-    state = 'prompt';
-    ScreenManager.show('prompt');
-    await Audio.speak(
-      'Hold the screen to start again.',
-      'Tahan skrin untuk mula semula.'
-    );
-
-    const promptEl = document.getElementById('screen-prompt');
-    function onPromptHold() {
-      promptEl.removeEventListener('mousedown',  onPromptHold);
-      promptEl.removeEventListener('touchstart', onPromptHold);
-      HoldDetection.reset();
-      startCamera();
-    }
-    promptEl.addEventListener('mousedown',  onPromptHold);
-    promptEl.addEventListener('touchstart', onPromptHold, { passive: true });
+  function showError(msg) {
+    document.getElementById('error-msg').textContent = msg;
+    ScreenManager.show('error');
+    state = 'error';
   }
 
   return { init };
 })();
 
-
-// ── Bootstrap ──
 window.addEventListener('DOMContentLoaded', () => App.init());
 </script>
 </body>
