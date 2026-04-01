@@ -3,12 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self';
-             script-src 'unsafe-inline' https://cdn.jsdelivr.net;
-             style-src 'unsafe-inline';
-             media-src mediastream: blob:;
-             connect-src https://storage.googleapis.com https://tfhub.dev https://www.kaggle.com https://kaggle.com https://cdn.jsdelivr.net blob:;" />
   <title>VisionWeb</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -535,8 +529,8 @@ const App = (() => {
       await Detector.load();
       document.getElementById('loader-sub').textContent = 'AI model ready.';
     } catch (err) {
-      console.error('Model load error:', err.name);
-      showError('Failed to load the AI model. Please check your connection and reload.');
+      console.error('Model load error:', err.name, err.message, err);
+      showError('AI model error: ' + err.name + ' — ' + (err.message || 'unknown') + '. Please reload.');
       return;
     }
 
