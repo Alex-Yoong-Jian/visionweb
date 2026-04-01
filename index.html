@@ -143,12 +143,10 @@
     <div class="error-msg" id="error-msg">Please reload the page and try again.</div>
   </div>
 
-<!-- TensorFlow.js core -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.8.6/dist/tf.min.js"></script>
-<!-- TensorFlow.js converter (required by coco-ssd) -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@2.8.6/dist/tf-converter.min.js"></script>
+<!-- TensorFlow.js — version-less per official COCO-SSD docs -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 <!-- COCO-SSD object detection model -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 <script>
 'use strict';
 
@@ -453,10 +451,8 @@ const Detector = (() => {
   const CENTRE_COVERAGE_MIN  = 0.20;
 
   async function load() {
-    // Wait for TF backend to be ready before loading model
-    await tf.ready();
-    // Use lite_mobilenet_v2 — smallest and most compatible base model
-    model = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
+    // Load model using default base (lite_mobilenet_v2)
+    model = await cocoSsd.load();
   }
 
   function isCentral(bbox, imgW, imgH) {
