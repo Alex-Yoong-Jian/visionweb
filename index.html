@@ -12,14 +12,12 @@
     .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s ease; }
     .screen.hidden { opacity: 0; pointer-events: none; }
 
-    /* ── Loading ── */
     #screen-loading { background: #fff; gap: 24px; }
     .loader-ring { width: 48px; height: 48px; border: 3px solid #eee; border-top-color: #1F4E79; border-radius: 50%; animation: spin 0.9s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .loader-text { font-size: 15px; color: #888; letter-spacing: 0.04em; text-align: center; }
     .loader-sub  { font-size: 12px; color: #bbb; margin-top: 4px; text-align: center; }
 
-    /* ── Prompt ── */
     #screen-prompt { background: #fff; gap: 32px; padding: 2rem; }
     .app-name { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; color: #1F4E79; text-transform: uppercase; }
     .prompt-icon { width: 72px; height: 72px; border-radius: 50%; background: #F0F4F8; display: flex; align-items: center; justify-content: center; }
@@ -28,49 +26,38 @@
     .prompt-text-my { font-size: 18px; font-weight: 400; color: #666; text-align: center; line-height: 1.4; }
     .prompt-hint { font-size: 13px; color: #aaa; text-align: center; margin-top: 8px; }
 
-    /* ── Camera / scanning combined ── */
     #screen-camera { background: #000; }
     #camera-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
     .cam-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-
-    /* Reticle corners */
     .reticle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 180px; height: 180px; }
     .reticle-corner { position: absolute; width: 24px; height: 24px; border-color: rgba(255,255,255,0.8); border-style: solid; }
     .reticle-corner.tl { top: 0; left: 0; border-width: 2px 0 0 2px; }
     .reticle-corner.tr { top: 0; right: 0; border-width: 2px 2px 0 0; }
     .reticle-corner.bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
     .reticle-corner.br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
-
-    /* Progress ring */
     .progress-wrap { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; }
     .progress-svg { width: 220px; height: 220px; transform: rotate(-90deg); }
     .progress-track { fill: none; stroke: rgba(255,255,255,0.15); stroke-width: 3; }
     .progress-fill  { fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 628; stroke-dashoffset: 628; transition: stroke-dashoffset 0.1s linear; }
-
-    /* Status + instruction */
     .cam-status { position: absolute; top: 48px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.45); backdrop-filter: blur(8px); border: 0.5px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 16px; font-size: 13px; color: rgba(255,255,255,0.8); white-space: nowrap; }
     .cam-instruction { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); text-align: center; }
     .cam-instruction-en { font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.9); }
     .cam-instruction-my { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 4px; }
-
-    /* Scanning spinner (shown on top of camera during AI analysis) */
     .scan-spinner-wrap { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
     .scan-spinner-wrap.visible { opacity: 1; }
     .scan-spinner { width: 56px; height: 56px; border: 3px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.9s linear infinite; }
     .scan-text-en { font-size: 16px; font-weight: 500; color: #fff; }
     .scan-text-my { font-size: 13px; color: rgba(255,255,255,0.6); }
 
-    /* ── Result ── */
     #screen-result { background: #fff; gap: 20px; padding: 2.5rem; }
     .result-label { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #1F4E79; text-transform: uppercase; }
     .result-mode-badge { padding: 4px 14px; border-radius: 12px; font-size: 12px; font-weight: 500; border: 1px solid #ddd; color: #555; }
     .result-confidence { font-size: 12px; color: #aaa; }
     .result-text-en { font-size: 22px; font-weight: 600; color: #111; text-align: center; line-height: 1.4; max-width: 340px; }
     .result-text-my { font-size: 16px; color: #666; text-align: center; line-height: 1.5; max-width: 340px; }
-    .result-again { font-size: 13px; color: #aaa; text-align: center; margin-top: 12px; }
+    .result-prompt { font-size: 14px; color: #1F4E79; text-align: center; margin-top: 8px; font-weight: 500; }
     .result-divider { width: 40px; height: 2px; background: #eee; border-radius: 1px; }
 
-    /* ── Error ── */
     #screen-error { background: #fff; gap: 16px; padding: 2rem; text-align: center; }
     .error-title { font-size: 20px; font-weight: 600; color: #c0392b; }
     .error-msg { font-size: 15px; color: #666; max-width: 300px; line-height: 1.6; }
@@ -78,14 +65,12 @@
 </head>
 <body>
 
-  <!-- SCREEN: LOADING -->
   <div class="screen" id="screen-loading">
     <div class="loader-ring"></div>
     <div class="loader-text">Starting VisionWeb…</div>
-    <div class="loader-sub" id="loader-sub">Loading AI model…</div>
+    <div class="loader-sub" id="loader-sub">Initialising…</div>
   </div>
 
-  <!-- SCREEN: PROMPT -->
   <div class="screen hidden" id="screen-prompt">
     <div class="app-name">VisionWeb</div>
     <div class="prompt-icon">
@@ -96,7 +81,6 @@
     <div class="prompt-hint">Hold anywhere for 3.5 seconds</div>
   </div>
 
-  <!-- SCREEN: CAMERA (holds during scanning too) -->
   <div class="screen hidden" id="screen-camera">
     <video id="camera-video" autoplay playsinline muted></video>
     <div class="cam-overlay">
@@ -104,7 +88,7 @@
       <div class="progress-wrap">
         <svg class="progress-svg" viewBox="0 0 220 220">
           <circle class="progress-track" cx="110" cy="110" r="100"/>
-          <circle class="progress-fill"  id="progress-ring" cx="110" cy="110" r="100"/>
+          <circle class="progress-fill" id="progress-ring" cx="110" cy="110" r="100"/>
         </svg>
       </div>
       <div class="reticle">
@@ -117,7 +101,6 @@
         <div class="cam-instruction-en" id="cam-instruction-en">Hold anywhere to scan</div>
         <div class="cam-instruction-my" id="cam-instruction-my">Tahan di mana-mana untuk mengimbas</div>
       </div>
-      <!-- Scanning spinner overlay — shown during AI analysis -->
       <div class="scan-spinner-wrap" id="scan-spinner">
         <div class="scan-spinner"></div>
         <div class="scan-text-en">Analysing…</div>
@@ -126,7 +109,6 @@
     </div>
   </div>
 
-  <!-- SCREEN: RESULT -->
   <div class="screen hidden" id="screen-result">
     <div class="result-label">Detected</div>
     <div class="result-mode-badge" id="result-mode">—</div>
@@ -134,126 +116,72 @@
     <div class="result-divider"></div>
     <div class="result-text-en" id="result-text-en">—</div>
     <div class="result-text-my" id="result-text-my">—</div>
-    <div class="result-again">Hold anywhere to scan again</div>
+    <div class="result-prompt">Hold anywhere to scan again</div>
   </div>
 
-  <!-- SCREEN: ERROR -->
   <div class="screen hidden" id="screen-error">
     <div class="error-title">Something went wrong</div>
     <div class="error-msg" id="error-msg">Please reload the page and try again.</div>
   </div>
 
-<!-- TensorFlow.js core -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@3.21.0/dist/tf-core.min.js"></script>
-<!-- TensorFlow.js converter — provides tfconv.loadGraphModel -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@3.21.0/dist/tf-converter.min.js"></script>
-<!-- TensorFlow.js WebGL backend -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@3.21.0/dist/tf-backend-webgl.min.js"></script>
-<!-- COCO-SSD model -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
 <script>
 'use strict';
 
 /* ═══════════════════════════════════════════════════════
    MODULE: TICK SOUND
-   Generates a Japanese pedestrian crossing-style
-   rhythmic beep using Web Audio API — no external file
-   needed. Steady, calm, accessible.
-   Exposes: TickSound.start(), TickSound.stop()
+   Japanese pedestrian crossing-style beep via Web Audio API.
+   initGlobal() fires a single beep on every touch anywhere.
+   start() / stop() run the rhythmic repeat during hold.
 ═══════════════════════════════════════════════════════ */
 const TickSound = (() => {
-  let ctx        = null;
-  let tickTimer  = null;
-  let isRunning  = false;
+  let ctx       = null;
+  let tickTimer = null;
+  let running   = false;
 
   function getCtx() {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
     return ctx;
   }
 
   function playBeep() {
-    const ac       = getCtx();
-    const osc      = ac.createOscillator();
-    const gainNode = ac.createGain();
-
-    osc.connect(gainNode);
-    gainNode.connect(ac.destination);
-
-    // Frequency: 880 Hz — clear, pleasant, similar to Japanese crossing signal
-    osc.type      = 'sine';
-    osc.frequency.setValueAtTime(880, ac.currentTime);
-
-    // Envelope: quick fade in, short sustain, quick fade out — avoids harsh click
-    gainNode.gain.setValueAtTime(0, ac.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.25, ac.currentTime + 0.02);
-    gainNode.gain.linearRampToValueAtTime(0.18, ac.currentTime + 0.08);
-    gainNode.gain.linearRampToValueAtTime(0,    ac.currentTime + 0.18);
-
-    osc.start(ac.currentTime);
-    osc.stop(ac.currentTime + 0.18);
+    try {
+      const ac   = getCtx();
+      const osc  = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ac.currentTime);
+      gain.gain.setValueAtTime(0,    ac.currentTime);
+      gain.gain.linearRampToValueAtTime(0.25, ac.currentTime + 0.02);
+      gain.gain.linearRampToValueAtTime(0.18, ac.currentTime + 0.08);
+      gain.gain.linearRampToValueAtTime(0,    ac.currentTime + 0.18);
+      osc.start(ac.currentTime);
+      osc.stop(ac.currentTime + 0.18);
+    } catch(e) {}
   }
 
   function start() {
-    if (isRunning) return;
-    isRunning = true;
-    playBeep(); // immediate first beep
-    tickTimer = setInterval(playBeep, 500); // beep every 500ms
+    if (running) return;
+    running   = true;
+    playBeep();
+    tickTimer = setInterval(playBeep, 500);
   }
 
   function stop() {
-    isRunning = false;
+    running = false;
     clearInterval(tickTimer);
     tickTimer = null;
   }
 
-  return { start, stop };
-})();
-
-
-/* ═══════════════════════════════════════════════════════
-   MODULE: TRANSLATIONS
-   Maps all 80 COCO-SSD class labels to Malay
-═══════════════════════════════════════════════════════ */
-const Translations = (() => {
-  const EN_TO_MY = {
-    'person':'orang','bicycle':'basikal','car':'kereta','motorcycle':'motosikal',
-    'airplane':'kapal terbang','bus':'bas','train':'kereta api','truck':'trak',
-    'boat':'bot','traffic light':'lampu isyarat','fire hydrant':'hidrант kebakaran',
-    'stop sign':'papan tanda berhenti','parking meter':'meter parkir','bench':'bangku',
-    'bird':'burung','cat':'kucing','dog':'anjing','horse':'kuda','sheep':'biri-biri',
-    'cow':'lembu','elephant':'gajah','bear':'beruang','zebra':'zebra','giraffe':'zirafah',
-    'backpack':'beg galas','umbrella':'payung','handbag':'beg tangan','tie':'tali leher',
-    'suitcase':'beg pakaian','frisbee':'frisbee','skis':'ski','snowboard':'papan salji',
-    'sports ball':'bola sukan','kite':'layang-layang','baseball bat':'kayu baseball',
-    'baseball glove':'sarung tangan baseball','skateboard':'papan luncur',
-    'surfboard':'papan selaju','tennis racket':'raket tenis','bottle':'botol',
-    'wine glass':'gelas wain','cup':'cawan','fork':'garpu','knife':'pisau',
-    'spoon':'sudu','bowl':'mangkuk','banana':'pisang','apple':'epal',
-    'sandwich':'sandwic','orange':'oren','broccoli':'brokoli','carrot':'lobak merah',
-    'hot dog':'hot dog','pizza':'piza','donut':'donat','cake':'kek','chair':'kerusi',
-    'couch':'sofa','potted plant':'pokok dalam pasu','bed':'katil',
-    'dining table':'meja makan','toilet':'tandas','tv':'televisyen',
-    'laptop':'komputer riba','mouse':'tetikus','remote':'alat kawalan jauh',
-    'keyboard':'papan kekunci','cell phone':'telefon bimbit',
-    'microwave':'ketuhar gelombang mikro','oven':'ketuhar','toaster':'pembakar roti',
-    'sink':'sinki','refrigerator':'peti sejuk','book':'buku','clock':'jam',
-    'vase':'pasu bunga','scissors':'gunting','teddy bear':'teddy bear',
-    'hair drier':'pengering rambut','toothbrush':'berus gigi',
-  };
-
-  function toMalay(label) { return EN_TO_MY[label.toLowerCase()] || label; }
-
-  function buildSentenceEN(label, isPerson) {
-    if (isPerson) return 'I can see a person in front of the camera.';
-    const article = ['a','e','i','o','u'].includes(label[0].toLowerCase()) ? 'an' : 'a';
-    return `I can see ${article} ${label}.`;
+  // Attach a single beep to every touch/click anywhere on the page
+  function initGlobal() {
+    document.addEventListener('mousedown',  () => playBeep());
+    document.addEventListener('touchstart', () => playBeep(), { passive: true });
   }
 
-  function buildSentenceMY(label) {
-    return `Saya nampak ${toMalay(label)}.`;
-  }
-
-  return { toMalay, buildSentenceEN, buildSentenceMY };
+  return { start, stop, initGlobal };
 })();
 
 
@@ -264,18 +192,16 @@ const ScreenManager = (() => {
   const ids = ['loading','prompt','camera','result','error'];
   const map = {};
   ids.forEach(id => map[id] = document.getElementById('screen-' + id));
-
   function show(name) {
     ids.forEach(id => map[id].classList.toggle('hidden', id !== name));
   }
-
   return { show };
 })();
 
 
 /* ═══════════════════════════════════════════════════════
    MODULE: AUDIO
-   Bilingual speech synthesis (EN + Malay)
+   Bilingual speech synthesis — English then Malay
 ═══════════════════════════════════════════════════════ */
 const Audio = (() => {
   const synth = window.speechSynthesis;
@@ -287,7 +213,9 @@ const Audio = (() => {
     speechSynthesis.onvoiceschanged = loadVoices;
   }
 
-  function findVoice(lang) { return voices.find(v => v.lang.startsWith(lang)) || null; }
+  function findVoice(lang) {
+    return voices.find(v => v.lang.startsWith(lang)) || null;
+  }
 
   function speakLine(text, lang, rate = 0.95) {
     return new Promise(resolve => {
@@ -310,7 +238,10 @@ const Audio = (() => {
   }
 
   async function prompt() {
-    await speak('Hold the screen to scan.', 'Tahan skrin untuk mengimbas.');
+    await speak(
+      'Hold the screen to scan.',
+      'Tahan skrin untuk mengimbas.'
+    );
   }
 
   return { speak, prompt };
@@ -346,7 +277,8 @@ const Camera = (() => {
     canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
-    return canvas;
+    // Return as base64 JPEG at 85% quality
+    return canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
   }
 
   return { start, stop, capture };
@@ -355,12 +287,12 @@ const Camera = (() => {
 
 /* ═══════════════════════════════════════════════════════
    MODULE: HOLD DETECTION
-   Fixed flow: hold → camera already open → detect automatically
-   No second hold required. Rate limiting: 3s cooldown.
+   3.5s steady hold with progress ring and tick sound.
+   Rate limited: 3s cooldown between scans.
 ═══════════════════════════════════════════════════════ */
 const HoldDetection = (() => {
-  const HOLD_MS      = 3500;
-  const COOLDOWN_MS  = 3000;
+  const HOLD_MS       = 3500;
+  const COOLDOWN_MS   = 3000;
   const CIRCUMFERENCE = 2 * Math.PI * 100;
 
   const ring     = document.getElementById('progress-ring');
@@ -377,7 +309,9 @@ const HoldDetection = (() => {
   let enabled    = false;
 
   function setStatus(msg) { statusEl.textContent = msg; }
-  function setProgress(pct) { ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - pct); }
+  function setProgress(pct) {
+    ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - pct);
+  }
 
   function tick() {
     const pct = Math.min((Date.now() - startTime) / HOLD_MS, 1);
@@ -387,24 +321,19 @@ const HoldDetection = (() => {
 
   function startHold() {
     if (!enabled || isHolding) return;
-
     const sinceLastScan = Date.now() - lastScanAt;
     if (sinceLastScan < COOLDOWN_MS) {
-      const remaining = Math.ceil((COOLDOWN_MS - sinceLastScan) / 1000);
-      setStatus(`Please wait ${remaining}s… / Sila tunggu ${remaining}s…`);
+      const wait = Math.ceil((COOLDOWN_MS - sinceLastScan) / 1000);
+      setStatus(`Please wait ${wait}s… / Sila tunggu ${wait}s…`);
       return;
     }
-
     isHolding = true;
     startTime = Date.now();
     setStatus('Hold steady… / Tahan…');
     instrEN.textContent = 'Keep holding…';
     instrMY.textContent = 'Teruskan tahan…';
     setProgress(0);
-
-    // Start ticking sound
     TickSound.start();
-
     rafId = requestAnimationFrame(tick);
     holdTimer = setTimeout(() => {
       cancelAnimationFrame(rafId);
@@ -438,8 +367,19 @@ const HoldDetection = (() => {
     el.addEventListener('touchcancel', (e) => { e.preventDefault(); endHold(); },   { passive: false });
   }
 
-  function enable()  { enabled = true;  setStatus('Hold to scan'); setProgress(0); instrEN.textContent = 'Hold anywhere to scan'; instrMY.textContent = 'Tahan di mana-mana untuk mengimbas'; }
-  function disable() { enabled = false; TickSound.stop(); endHold(); }
+  function enable() {
+    enabled = true;
+    setStatus('Hold to scan');
+    setProgress(0);
+    instrEN.textContent = 'Hold anywhere to scan';
+    instrMY.textContent = 'Tahan di mana-mana untuk mengimbas';
+  }
+
+  function disable() {
+    enabled = false;
+    TickSound.stop();
+    endHold();
+  }
 
   return { init, enable, disable };
 })();
@@ -447,54 +387,92 @@ const HoldDetection = (() => {
 
 /* ═══════════════════════════════════════════════════════
    MODULE: DETECTOR
-   Uses COCO-SSD v2.2.2 with TF.js v3.21.0 components
-   loaded individually as script tags. This is the only
-   confirmed working combination in the browser.
-   cocoSsd is exposed as a global by the CDN script tag.
+   Calls /api/detect (our secure Vercel serverless function).
+   The API key never touches the browser — it lives only
+   on Vercel's servers as an environment variable.
 ═══════════════════════════════════════════════════════ */
 const Detector = (() => {
-  let model = null;
-  const CONFIDENCE_THRESHOLD = 0.55;
-  const CENTRE_COVERAGE_MIN  = 0.15;
+  async function analyse(base64Image) {
+    const resp = await fetch('/api/detect', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ image: base64Image })
+    });
 
-  async function load() {
-    // cocoSsd is a global exposed by the COCO-SSD CDN script
-    model = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
-  }
-
-  function isCentral(bbox) {
-    // COCO-SSD bbox format: [x, y, width, height] in pixels
-    // canvas is 1280x720, normalise to 0-1
-    // We use a simpler heuristic: just check width/height ratio
-    const [x, y, w, h] = bbox;
-    // We don't have canvas dims here so use rough pixel thresholds
-    // If box is reasonably large (>100px wide or tall) it's likely central
-    return w > 100 || h > 100;
-  }
-
-  async function analyse(canvas) {
-    if (!model) throw new Error('Model not loaded');
-
-    // COCO-SSD accepts canvas directly — no manual preprocessing needed
-    const predictions = await model.detect(canvas, 10, CONFIDENCE_THRESHOLD);
-
-    if (!predictions || predictions.length === 0) {
-      return { mode: 'scene', label: null, score: 0 };
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${resp.status}`);
     }
 
-    // Sort by score
-    predictions.sort((a, b) => b.score - a.score);
-
-    // Check if top prediction has a large bounding box (portrait mode)
-    const top = predictions[0];
-    if (isCentral(top.bbox)) {
-      return { mode: 'portrait', label: top.class, score: top.score };
-    }
-
-    return { mode: 'scene', label: top.class, score: top.score };
+    return await resp.json();
   }
 
-  return { load, analyse };
+  return { analyse };
+})();
+
+
+/* ═══════════════════════════════════════════════════════
+   MODULE: RESULT BUILDER
+   Builds bilingual sentences from the detection result.
+═══════════════════════════════════════════════════════ */
+const ResultBuilder = (() => {
+  const EN_TO_MY = {
+    'person':'orang','people':'orang ramai','man':'lelaki','woman':'wanita',
+    'child':'kanak-kanak','face':'muka','hand':'tangan','car':'kereta',
+    'vehicle':'kenderaan','road':'jalan raya','building':'bangunan',
+    'tree':'pokok','sky':'langit','water':'air','food':'makanan',
+    'chair':'kerusi','table':'meja','laptop':'komputer riba','phone':'telefon',
+    'book':'buku','door':'pintu','window':'tingkap','wall':'dinding',
+    'floor':'lantai','ceiling':'siling','light':'lampu','fan':'kipas',
+    'television':'televisyen','sofa':'sofa','bed':'katil','plant':'tumbuhan',
+    'cup':'cawan','bottle':'botol','bag':'beg','clothing':'pakaian',
+    'indoor':'dalam rumah','outdoor':'luar rumah','nature':'alam semula jadi',
+    'street':'jalan','city':'bandar','room':'bilik','kitchen':'dapur',
+    'bathroom':'bilik air','bedroom':'bilik tidur','office':'pejabat',
+    'animal':'haiwan','dog':'anjing','cat':'kucing','bird':'burung',
+  };
+
+  function toMalay(text) {
+    return EN_TO_MY[text.toLowerCase()] || text;
+  }
+
+  function build(result) {
+    if (result.mode === 'portrait' && result.description) {
+      const name     = result.description;
+      const isPerson = /person|people|man|woman|child|face/i.test(name);
+      if (isPerson) {
+        return {
+          en: 'I can see a person in front of the camera.',
+          my: 'Saya nampak seseorang di hadapan kamera.'
+        };
+      }
+      const article = 'aeiouAEIOU'.includes(name[0]) ? 'an' : 'a';
+      return {
+        en: `I can see ${article} ${name}.`,
+        my: `Saya nampak ${toMalay(name)}.`
+      };
+    }
+
+    if (result.mode === 'scene' && result.description) {
+      if (result.isLandmark) {
+        return {
+          en: `This appears to be ${result.description}.`,
+          my: `Ini kelihatan seperti ${toMalay(result.description)}.`
+        };
+      }
+      return {
+        en: `This looks like a scene containing ${result.description}.`,
+        my: `Ini kelihatan seperti pemandangan yang mengandungi ${toMalay(result.description)}.`
+      };
+    }
+
+    return {
+      en: 'I could not clearly identify what is in view. Please try again with better lighting.',
+      my: 'Saya tidak dapat mengenal pasti dengan jelas. Sila cuba semula dengan pencahayaan yang lebih baik.'
+    };
+  }
+
+  return { build };
 })();
 
 
@@ -502,8 +480,12 @@ const Detector = (() => {
    MODULE: RESULT DISPLAY
 ═══════════════════════════════════════════════════════ */
 const ResultDisplay = (() => {
-  function show({ mode, label, score, sentenceEN, sentenceMY }) {
-    const modeLabel  = mode === 'portrait' ? 'Portrait mode — Object detected' : 'Scene mode — Environment detected';
+  function show(mode, sentenceEN, sentenceMY, score) {
+    const modeLabel  = mode === 'portrait'
+      ? 'Object detected'
+      : mode === 'scene'
+        ? 'Scene detected'
+        : 'Detection complete';
     const confidence = score > 0 ? `${Math.round(score * 100)}% confidence` : '';
     document.getElementById('result-mode').textContent       = modeLabel;
     document.getElementById('result-confidence').textContent = confidence;
@@ -516,9 +498,8 @@ const ResultDisplay = (() => {
 
 /* ═══════════════════════════════════════════════════════
    MODULE: APP CONTROLLER
-   Fixed flow:
-   loading → prompt (hold) → camera opens + hold detection
-   → 3.5s hold → detect → result → (hold) → camera again
+   Phase 3 state machine — no model loading required.
+   loading → prompt → camera → scanning → result → camera
 ═══════════════════════════════════════════════════════ */
 const App = (() => {
   let state = 'loading';
@@ -526,18 +507,11 @@ const App = (() => {
   async function init() {
     ScreenManager.show('loading');
 
+    // Attach global tick beep to every touch anywhere on the page
+    TickSound.initGlobal();
+
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       showError('Your browser does not support camera access. Please use Chrome or Safari.');
-      return;
-    }
-
-    try {
-      document.getElementById('loader-sub').textContent = 'Loading AI model… (this may take a few seconds)';
-      await Detector.load();
-      document.getElementById('loader-sub').textContent = 'AI model ready.';
-    } catch (err) {
-      console.error('Model load error:', err.name, err.message, err);
-      showError('AI model error: ' + err.name + ' — ' + (err.message || 'unknown') + '. Please reload.');
       return;
     }
 
@@ -550,7 +524,6 @@ const App = (() => {
     state = 'prompt';
     Audio.prompt();
 
-    // Single hold on prompt → open camera immediately + enable hold detection
     const el = document.getElementById('screen-prompt');
     function onHold() {
       el.removeEventListener('mousedown',  onHold);
@@ -562,73 +535,60 @@ const App = (() => {
   }
 
   async function openCameraAndListen() {
-    // Open camera
     try {
       await Camera.start();
     } catch (err) {
       console.error('Camera error:', err.name);
       showError(
-        'Camera access was denied. Please allow camera access in your browser settings and reload. / ' +
+        'Camera access was denied. Please allow camera access and reload. / ' +
         'Akses kamera ditolak. Sila benarkan akses kamera dan muat semula.'
       );
       return;
     }
 
-    // Switch to camera screen — hold detection now active
     ScreenManager.show('camera');
     state = 'camera';
-
-    // Initialise hold detection (only needs to be done once)
     HoldDetection.init(onHoldComplete);
     HoldDetection.enable();
 
-    await Audio.speak('Camera is ready. Hold to scan.', 'Kamera sedia. Tahan untuk mengimbas.');
+    await Audio.speak(
+      'Camera is ready. Hold to scan.',
+      'Kamera sedia. Tahan untuk mengimbas.'
+    );
   }
 
   async function onHoldComplete() {
     if (state !== 'camera') return;
     state = 'scanning';
-
-    // Disable further holds while processing
     HoldDetection.disable();
 
-    // Capture frame — camera still live for a clean frame
-    const frame = Camera.capture();
-
-    // Show scanning spinner over camera
+    // Capture frame as base64 while camera still live
+    const base64Image = Camera.capture();
     document.getElementById('scan-spinner').classList.add('visible');
     await Audio.speak('Analysing now.', 'Sedang menganalisis.');
-
-    // Stop camera after capture
     Camera.stop();
 
     try {
-      const result = await Detector.analyse(frame);
-      const isPerson = result.label === 'person';
+      const result    = await Detector.analyse(base64Image);
+      const sentences = ResultBuilder.build(result);
 
-      let sentenceEN, sentenceMY;
-
-      if (result.mode === 'portrait' && result.label) {
-        sentenceEN = Translations.buildSentenceEN(result.label, isPerson);
-        sentenceMY = Translations.buildSentenceMY(result.label);
-      } else if (result.mode === 'scene' && result.label) {
-        sentenceEN = `This looks like a scene. I can also see ${result.label === 'person' ? 'people' : 'a ' + result.label} nearby.`;
-        sentenceMY = `Ini kelihatan seperti pemandangan. Saya juga nampak ${Translations.toMalay(result.label)} berhampiran.`;
-      } else {
-        sentenceEN = 'I could not clearly identify what is in view. Please try again with better lighting.';
-        sentenceMY = 'Saya tidak dapat mengenal pasti dengan jelas. Sila cuba semula dengan pencahayaan yang lebih baik.';
-      }
-
-      // Hide scanning spinner
       document.getElementById('scan-spinner').classList.remove('visible');
-
-      ResultDisplay.show({ ...result, sentenceEN, sentenceMY });
+      ResultDisplay.show(result.mode, sentences.en, sentences.my, result.score);
       ScreenManager.show('result');
       state = 'result';
 
-      await Audio.speak(sentenceEN, sentenceMY);
+      // 1. Speak the detection result
+      await Audio.speak(sentences.en, sentences.my);
 
-      // Listen for hold on result to scan again
+      // 2. Then explicitly prompt the user to hold again
+      //    Critical for visually impaired users — they need to know
+      //    the app is done and is waiting for their next action
+      await Audio.speak(
+        'Hold anywhere to scan again.',
+        'Tahan di mana-mana untuk mengimbas semula.'
+      );
+
+      // 3. Now listen for the next hold
       const resultEl = document.getElementById('screen-result');
       function onResultHold() {
         resultEl.removeEventListener('mousedown',  onResultHold);
@@ -639,14 +599,13 @@ const App = (() => {
       resultEl.addEventListener('touchstart', onResultHold, { passive: true });
 
     } catch (err) {
-      console.error('Detection error:', err.name);
+      console.error('Detection error:', err.name, err.message);
       document.getElementById('scan-spinner').classList.remove('visible');
-      showError('Detection failed. Please reload and try again.');
+      showError('Detection failed: ' + (err.message || err.name) + '. Please reload.');
     }
   }
 
   async function scanAgain() {
-    // Reopen camera and re-enable hold detection — no need to re-init
     try {
       await Camera.start();
     } catch (err) {
@@ -654,12 +613,13 @@ const App = (() => {
       showError('Camera could not be reopened. Please reload.');
       return;
     }
-
     ScreenManager.show('camera');
     state = 'camera';
     HoldDetection.enable();
-
-    await Audio.speak('Ready. Hold to scan again.', 'Sedia. Tahan untuk mengimbas semula.');
+    await Audio.speak(
+      'Ready. Hold to scan again.',
+      'Sedia. Tahan untuk mengimbas semula.'
+    );
   }
 
   function showError(msg) {
