@@ -55,6 +55,7 @@
     .result-confidence { font-size: 12px; color: #aaa; }
     .result-text-en { font-size: 22px; font-weight: 600; color: #111; text-align: center; line-height: 1.4; max-width: 340px; }
     .result-text-my { font-size: 16px; color: #666; text-align: center; line-height: 1.5; max-width: 340px; }
+    .result-scan-info { font-size: 12px; color: #aaa; text-align: center; }
     .result-prompt { font-size: 14px; color: #1F4E79; text-align: center; margin-top: 8px; font-weight: 500; }
     .result-divider { width: 40px; height: 2px; background: #eee; border-radius: 1px; }
 
@@ -62,34 +63,60 @@
     .error-title { font-size: 20px; font-weight: 600; color: #c0392b; }
     .error-msg { font-size: 15px; color: #666; max-width: 300px; line-height: 1.6; }
 
-    /* ── Limit screen ── */
     #screen-limit { background: #fff; gap: 16px; padding: 2rem; text-align: center; }
     .limit-icon  { font-size: 48px; }
     .limit-title { font-size: 22px; font-weight: 600; color: #1F4E79; }
     .limit-msg   { font-size: 15px; color: #444; max-width: 300px; line-height: 1.7; }
     .limit-sub   { font-size: 13px; color: #aaa; max-width: 300px; line-height: 1.7; }
 
-    /* ── Scan info on result screen ── */
-    .result-scan-info { font-size: 12px; color: #aaa; text-align: center; }
+    /* ── Version badge ── */
+    #version-badge {
+      position: fixed; top: 14px; right: 14px;
+      font-size: 10px; font-weight: 600;
+      color: rgba(0,0,0,0.25);
+      letter-spacing: 0.05em;
+      z-index: 200;
+      pointer-events: none;
+    }
 
-    /* ── Unlock bar: fixed at bottom, always visible ── */
+    /* ── Up arrow toggle ── */
+    #unlock-toggle {
+      position: fixed; bottom: 16px; right: 16px;
+      width: 40px; height: 40px;
+      background: rgba(31,78,121,0.12);
+      border: 1px solid rgba(31,78,121,0.2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      z-index: 101;
+      font-size: 18px; color: rgba(31,78,121,0.5);
+      transition: background 0.2s;
+    }
+    #unlock-toggle:hover { background: rgba(31,78,121,0.22); }
+    #unlock-toggle.verified { background: rgba(29,106,58,0.12); border-color: rgba(29,106,58,0.35); color: rgba(29,106,58,0.75); }
+
+    /* ── Unlock bar: hidden by default, slides up on toggle ── */
     #unlock-bar {
       position: fixed; bottom: 0; left: 0; right: 0;
-      background: rgba(255,255,255,0.95);
+      background: rgba(255,255,255,0.97);
       backdrop-filter: blur(8px);
       border-top: 1px solid #eee;
-      padding: 10px 16px 14px;
+      padding: 12px 16px 16px;
       display: flex; flex-direction: column; gap: 6px;
       z-index: 100;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
     }
+    #unlock-bar.open { transform: translateY(0); }
     #unlock-bar input {
       width: 100%; padding: 9px 12px; border: 1px solid #ddd;
       border-radius: 8px; font-size: 14px; color: #333;
       background: #fff; outline: none;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
-    #unlock-bar input:focus   { border-color: #1F4E79; }
-    #unlock-bar input.verified { border-color: #1D6A3A; border-width: 2px; box-shadow: 0 0 0 3px rgba(29,106,58,0.15); transition: border-color 0.3s, box-shadow 0.3s; }
+    #unlock-bar input:focus { border-color: #1F4E79; }
+    #unlock-bar input.verified { border-color: #1D6A3A; border-width: 2px; box-shadow: 0 0 0 3px rgba(29,106,58,0.15); }
     #unlock-btn {
       width: 100%; padding: 10px; background: #1F4E79; color: #fff;
       border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
@@ -99,12 +126,15 @@
     #unlock-msg { font-size: 12px; color: #888; text-align: center; min-height: 16px; }
     #unlock-msg.success { color: #1D6A3A; }
     #unlock-msg.error   { color: #c0392b; }
-
-    /* Push screens up so unlock bar doesn't overlap content */
-    .screen { padding-bottom: 110px; }
   </style>
 </head>
 <body>
+
+  <!-- Version badge -->
+  <div id="version-badge">v3.12.0</div>
+
+  <!-- Unlock arrow toggle — discreet, bottom right -->
+  <div id="unlock-toggle">&#8679;</div>
 
   <div class="screen" id="screen-loading">
     <div class="loader-ring"></div>
@@ -166,7 +196,6 @@
     <div class="error-msg" id="error-msg">Please reload the page and try again.</div>
   </div>
 
-  <!-- SCREEN: LIMIT REACHED -->
   <div class="screen hidden" id="screen-limit">
     <div class="limit-icon">⏳</div>
     <div class="limit-title">Weekly limit reached</div>
@@ -174,7 +203,7 @@
     <div class="limit-sub">Had limu mingguan dicapai.<br>Had anda ditetapkan semula setiap hari Isnin.</div>
   </div>
 
-  <!-- UNLOCK INPUT: fixed at bottom, always visible -->
+  <!-- Unlock bar: hidden until arrow is tapped -->
   <div id="unlock-bar">
     <input type="email" id="unlock-input" placeholder="Enter email to unlock unlimited scans" autocomplete="email" />
     <button id="unlock-btn">Unlock</button>
@@ -184,16 +213,15 @@
 <script>
 'use strict';
 
-/* ═══════════════════════════════════════════════════════
-   MODULE: TICK SOUND
-   Japanese pedestrian crossing-style beep via Web Audio API.
-   initGlobal() fires a single beep on every touch anywhere.
-   start() / stop() run the rhythmic repeat during hold.
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   TICK SOUND — Japanese crossing-style beep
+   Global: fires on every touch anywhere.
+   start()/stop(): rhythmic repeat during hold.
+   The unlock bar suppresses propagation so no
+   tick fires during email input workflow.
+═══════════════════════════════════════════════ */
 const TickSound = (() => {
-  let ctx       = null;
-  let tickTimer = null;
-  let running   = false;
+  let ctx = null, tickTimer = null, running = false;
 
   function getCtx() {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -203,36 +231,28 @@ const TickSound = (() => {
 
   function playBeep() {
     try {
-      const ac   = getCtx();
-      const osc  = ac.createOscillator();
-      const gain = ac.createGain();
-      osc.connect(gain);
-      gain.connect(ac.destination);
+      const ac = getCtx(), osc = ac.createOscillator(), gain = ac.createGain();
+      osc.connect(gain); gain.connect(ac.destination);
       osc.type = 'sine';
       osc.frequency.setValueAtTime(880, ac.currentTime);
-      gain.gain.setValueAtTime(0,    ac.currentTime);
+      gain.gain.setValueAtTime(0, ac.currentTime);
       gain.gain.linearRampToValueAtTime(0.25, ac.currentTime + 0.02);
       gain.gain.linearRampToValueAtTime(0.18, ac.currentTime + 0.08);
       gain.gain.linearRampToValueAtTime(0,    ac.currentTime + 0.18);
-      osc.start(ac.currentTime);
-      osc.stop(ac.currentTime + 0.18);
+      osc.start(ac.currentTime); osc.stop(ac.currentTime + 0.18);
     } catch(e) {}
   }
 
   function start() {
     if (running) return;
-    running   = true;
-    playBeep();
+    running = true; playBeep();
     tickTimer = setInterval(playBeep, 500);
   }
 
   function stop() {
-    running = false;
-    clearInterval(tickTimer);
-    tickTimer = null;
+    running = false; clearInterval(tickTimer); tickTimer = null;
   }
 
-  // Attach a single beep to every touch/click anywhere on the page
   function initGlobal() {
     document.addEventListener('mousedown',  () => playBeep());
     document.addEventListener('touchstart', () => playBeep(), { passive: true });
@@ -242,9 +262,9 @@ const TickSound = (() => {
 })();
 
 
-/* ═══════════════════════════════════════════════════════
-   MODULE: SCREEN MANAGER
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   SCREEN MANAGER
+═══════════════════════════════════════════════ */
 const ScreenManager = (() => {
   const ids = ['loading','prompt','camera','result','error','limit'];
   const map = {};
@@ -256,58 +276,43 @@ const ScreenManager = (() => {
 })();
 
 
-/* ═══════════════════════════════════════════════════════
-   MODULE: AUDIO
-   Bilingual speech synthesis — English then Malay
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   AUDIO — Bilingual speech (EN + Malay)
+═══════════════════════════════════════════════ */
 const Audio = (() => {
   const synth = window.speechSynthesis;
   let voices  = [];
-
   function loadVoices() { voices = synth.getVoices(); }
   loadVoices();
   if (speechSynthesis.onvoiceschanged !== undefined) {
     speechSynthesis.onvoiceschanged = loadVoices;
   }
-
-  function findVoice(lang) {
-    return voices.find(v => v.lang.startsWith(lang)) || null;
-  }
-
+  function findVoice(lang) { return voices.find(v => v.lang.startsWith(lang)) || null; }
   function speakLine(text, lang, rate = 0.95) {
     return new Promise(resolve => {
-      const utt   = new SpeechSynthesisUtterance(text);
-      utt.lang    = lang;
-      utt.rate    = rate;
-      utt.pitch   = 1;
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.lang = lang; utt.rate = rate; utt.pitch = 1;
       const voice = findVoice(lang);
       if (voice) utt.voice = voice;
-      utt.onend   = resolve;
-      utt.onerror = resolve;
+      utt.onend = resolve; utt.onerror = resolve;
       synth.speak(utt);
     });
   }
-
   async function speak(en, my) {
     synth.cancel();
     await speakLine(en, 'en');
     if (my) await speakLine(my, 'ms');
   }
-
   async function prompt() {
-    await speak(
-      'Hold the screen to scan.',
-      'Tahan skrin untuk mengimbas.'
-    );
+    await speak('Hold the screen to scan.', 'Tahan skrin untuk mengimbas.');
   }
-
   return { speak, prompt };
 })();
 
 
-/* ═══════════════════════════════════════════════════════
-   MODULE: CAMERA
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   CAMERA
+═══════════════════════════════════════════════ */
 const Camera = (() => {
   const video = document.getElementById('camera-video');
   let stream  = null;
@@ -322,19 +327,13 @@ const Camera = (() => {
   }
 
   function stop() {
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
-      stream = null;
-      video.srcObject = null;
-    }
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; video.srcObject = null; }
   }
 
   function capture() {
-    const canvas  = document.createElement('canvas');
-    canvas.width  = video.videoWidth;
-    canvas.height = video.videoHeight;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
-    // Return as base64 JPEG at 85% quality
     return canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
   }
 
@@ -342,33 +341,21 @@ const Camera = (() => {
 })();
 
 
-/* ═══════════════════════════════════════════════════════
-   MODULE: HOLD DETECTION
-   3.5s steady hold with progress ring and tick sound.
-   Rate limited: 3s cooldown between scans.
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   HOLD DETECTION — 3.5s hold with tick + ring
+   Rate limit: 3s cooldown between scans
+═══════════════════════════════════════════════ */
 const HoldDetection = (() => {
-  const HOLD_MS       = 3500;
-  const COOLDOWN_MS   = 3000;
-  const CIRCUMFERENCE = 2 * Math.PI * 100;
-
-  const ring     = document.getElementById('progress-ring');
+  const HOLD_MS = 3500, COOLDOWN_MS = 3000, CIRC = 2 * Math.PI * 100;
+  const ring = document.getElementById('progress-ring');
   const statusEl = document.getElementById('cam-status');
   const instrEN  = document.getElementById('cam-instruction-en');
   const instrMY  = document.getElementById('cam-instruction-my');
-
-  let holdTimer  = null;
-  let startTime  = null;
-  let rafId      = null;
-  let isHolding  = false;
-  let lastScanAt = 0;
-  let onComplete = null;
-  let enabled    = false;
+  let holdTimer = null, startTime = null, rafId = null;
+  let isHolding = false, lastScanAt = 0, onComplete = null, enabled = false;
 
   function setStatus(msg) { statusEl.textContent = msg; }
-  function setProgress(pct) {
-    ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - pct);
-  }
+  function setProgress(pct) { ring.style.strokeDashoffset = CIRC * (1 - pct); }
 
   function tick() {
     const pct = Math.min((Date.now() - startTime) / HOLD_MS, 1);
@@ -378,44 +365,33 @@ const HoldDetection = (() => {
 
   function startHold() {
     if (!enabled || isHolding) return;
-    const sinceLastScan = Date.now() - lastScanAt;
-    if (sinceLastScan < COOLDOWN_MS) {
-      const wait = Math.ceil((COOLDOWN_MS - sinceLastScan) / 1000);
+    const since = Date.now() - lastScanAt;
+    if (since < COOLDOWN_MS) {
+      const wait = Math.ceil((COOLDOWN_MS - since) / 1000);
       setStatus(`Please wait ${wait}s… / Sila tunggu ${wait}s…`);
       return;
     }
-    isHolding = true;
-    startTime = Date.now();
+    isHolding = true; startTime = Date.now();
     setStatus('Hold steady… / Tahan…');
-    instrEN.textContent = 'Keep holding…';
-    instrMY.textContent = 'Teruskan tahan…';
-    setProgress(0);
-    TickSound.start();
-    rafId = requestAnimationFrame(tick);
+    instrEN.textContent = 'Keep holding…'; instrMY.textContent = 'Teruskan tahan…';
+    setProgress(0); TickSound.start(); rafId = requestAnimationFrame(tick);
     holdTimer = setTimeout(() => {
-      cancelAnimationFrame(rafId);
-      TickSound.stop();
-      setProgress(1);
-      lastScanAt = Date.now();
-      if (onComplete) onComplete();
+      cancelAnimationFrame(rafId); TickSound.stop(); setProgress(1);
+      lastScanAt = Date.now(); if (onComplete) onComplete();
     }, HOLD_MS);
   }
 
   function endHold() {
     if (!isHolding) return;
-    isHolding = false;
-    clearTimeout(holdTimer);
-    cancelAnimationFrame(rafId);
-    TickSound.stop();
-    setProgress(0);
-    setStatus('Hold to scan');
+    isHolding = false; clearTimeout(holdTimer); cancelAnimationFrame(rafId);
+    TickSound.stop(); setProgress(0); setStatus('Hold to scan');
     instrEN.textContent = 'Hold anywhere to scan';
     instrMY.textContent = 'Tahan di mana-mana untuk mengimbas';
   }
 
   function init(completeFn) {
     onComplete = completeFn;
-    const el   = document.getElementById('screen-camera');
+    const el = document.getElementById('screen-camera');
     el.addEventListener('mousedown',   () => startHold());
     el.addEventListener('mouseup',     () => endHold());
     el.addEventListener('mouseleave',  () => endHold());
@@ -425,41 +401,30 @@ const HoldDetection = (() => {
   }
 
   function enable() {
-    enabled = true;
-    setStatus('Hold to scan');
-    setProgress(0);
+    enabled = true; setStatus('Hold to scan'); setProgress(0);
     instrEN.textContent = 'Hold anywhere to scan';
     instrMY.textContent = 'Tahan di mana-mana untuk mengimbas';
   }
 
-  function disable() {
-    enabled = false;
-    TickSound.stop();
-    endHold();
-  }
+  function disable() { enabled = false; TickSound.stop(); endHold(); }
 
   return { init, enable, disable };
 })();
 
 
-/* ═══════════════════════════════════════════════════════
-   MODULE: DETECTOR
-   Calls /api/detect (our secure Vercel serverless function).
-   The API key never touches the browser — it lives only
-   on Vercel's servers as an environment variable.
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   DETECTOR — calls /api/detect (secure proxy)
+   Sends unlock token if stored in localStorage
+═══════════════════════════════════════════════ */
 const Detector = (() => {
   async function analyse(base64Image) {
-    // Include unlock token if stored in localStorage
     const token = localStorage.getItem('visionweb_token') || undefined;
-
-    const resp = await fetch('/api/detect', {
+    const resp  = await fetch('/api/detect', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ image: base64Image, token })
     });
 
-    // 429 = weekly limit reached
     if (resp.status === 429) {
       const err = await resp.json().catch(() => ({}));
       const limitErr = new Error(err.error || 'Weekly limit reached');
@@ -474,15 +439,14 @@ const Detector = (() => {
 
     return await resp.json();
   }
-
   return { analyse };
 })();
 
 
-/* ═══════════════════════════════════════════════════════
-   MODULE: RESULT BUILDER
-   Builds bilingual sentences from the detection result.
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   RESULT BUILDER — wraps Claude's noun phrases
+   into bilingual spoken sentences
+═══════════════════════════════════════════════ */
 const ResultBuilder = (() => {
   function build(result) {
     if (!result.description) {
@@ -502,16 +466,12 @@ const ResultBuilder = (() => {
 })();
 
 
-/* ═══════════════════════════════════════════════════════
-   MODULE: RESULT DISPLAY
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   RESULT DISPLAY
+═══════════════════════════════════════════════ */
 const ResultDisplay = (() => {
   function show(mode, sentenceEN, sentenceMY, score) {
-    const modeLabel  = mode === 'portrait'
-      ? 'Object detected'
-      : mode === 'scene'
-        ? 'Scene detected'
-        : 'Detection complete';
+    const modeLabel  = mode === 'portrait' ? 'Object detected' : mode === 'scene' ? 'Scene detected' : 'Detection complete';
     const confidence = score > 0 ? `${Math.round(score * 100)}% confidence` : '';
     document.getElementById('result-mode').textContent       = modeLabel;
     document.getElementById('result-confidence').textContent = confidence;
@@ -522,18 +482,106 @@ const ResultDisplay = (() => {
 })();
 
 
-/* ═══════════════════════════════════════════════════════
-   MODULE: APP CONTROLLER
-   Phase 3 state machine — no model loading required.
-   loading → prompt → camera → scanning → result → camera
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   UNLOCK MANAGER
+   Arrow toggle reveals email input bar.
+   All events stop propagating so no tick sound
+   fires during the unlock workflow.
+═══════════════════════════════════════════════ */
+const UnlockManager = (() => {
+  const STORAGE_KEY = 'visionweb_token';
+
+  function init() {
+    const btn    = document.getElementById('unlock-btn');
+    const input  = document.getElementById('unlock-input');
+    const msg    = document.getElementById('unlock-msg');
+    const bar    = document.getElementById('unlock-bar');
+    const toggle = document.getElementById('unlock-toggle');
+
+    // Toggle bar — suppress tick on arrow press
+    toggle.addEventListener('mousedown',  (e) => e.stopPropagation());
+    toggle.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+    toggle.addEventListener('click', () => bar.classList.toggle('open'));
+
+    // Suppress tick on all bar interactions
+    bar.addEventListener('mousedown',  (e) => e.stopPropagation());
+    bar.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+
+    // If already unlocked
+    if (localStorage.getItem(STORAGE_KEY)) {
+      msg.textContent   = '✓ Unlimited access active';
+      msg.className     = 'success';
+      input.value       = '';
+      input.placeholder = 'Unlimited access active';
+      input.disabled    = true;
+      input.classList.add('verified');
+      btn.disabled      = true;
+      btn.textContent   = 'Unlocked';
+      toggle.classList.add('verified');
+      toggle.innerHTML  = '✓';
+    }
+
+    btn.addEventListener('click', () => attemptUnlock(input, msg, toggle, bar));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') attemptUnlock(input, msg, toggle, bar);
+    });
+  }
+
+  async function attemptUnlock(input, msg, toggle, bar) {
+    const email = input.value.trim();
+    if (!email) return;
+
+    msg.textContent = 'Verifying…'; msg.className = '';
+
+    try {
+      const resp = await fetch('/api/unlock', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email })
+      });
+      const data = await resp.json();
+
+      if (!resp.ok || !data.token) {
+        msg.textContent = data.error || 'Email not recognised';
+        msg.className   = 'error';
+        input.classList.remove('verified');
+        return;
+      }
+
+      localStorage.setItem('visionweb_token', data.token);
+      msg.textContent   = '✓ Unlimited access unlocked!';
+      msg.className     = 'success';
+      input.value       = '';
+      input.placeholder = 'Unlimited access active';
+      input.disabled    = true;
+      input.classList.add('verified');
+      const btn         = document.getElementById('unlock-btn');
+      btn.disabled      = true;
+      btn.textContent   = 'Unlocked';
+      toggle.classList.add('verified');
+      toggle.innerHTML  = '✓';
+      setTimeout(() => bar.classList.remove('open'), 1500);
+
+    } catch {
+      msg.textContent = 'Connection error. Please try again.';
+      msg.className   = 'error';
+    }
+  }
+
+  return { init };
+})();
+
+
+/* ═══════════════════════════════════════════════
+   APP CONTROLLER
+   State machine:
+   loading → prompt → camera → scanning → result
+═══════════════════════════════════════════════ */
 const App = (() => {
   let state = 'loading';
 
   async function init() {
     ScreenManager.show('loading');
-
-    // Attach global tick beep to every touch anywhere on the page
     TickSound.initGlobal();
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -571,16 +619,11 @@ const App = (() => {
       );
       return;
     }
-
     ScreenManager.show('camera');
     state = 'camera';
     HoldDetection.init(onHoldComplete);
     HoldDetection.enable();
-
-    await Audio.speak(
-      'Camera is ready. Hold to scan.',
-      'Kamera sedia. Tahan untuk mengimbas.'
-    );
+    await Audio.speak('Camera is ready. Hold to scan.', 'Kamera sedia. Tahan untuk mengimbas.');
   }
 
   async function onHoldComplete() {
@@ -588,7 +631,6 @@ const App = (() => {
     state = 'scanning';
     HoldDetection.disable();
 
-    // Capture frame as base64 while camera still live
     const base64Image = Camera.capture();
     document.getElementById('scan-spinner').classList.add('visible');
     await Audio.speak('Analysing now.', 'Sedang menganalisis.');
@@ -601,7 +643,7 @@ const App = (() => {
       document.getElementById('scan-spinner').classList.remove('visible');
       ResultDisplay.show(result.mode, sentences.en, sentences.my, result.score);
 
-      // Show scan usage info (hidden for unlimited users)
+      // Show scan usage info
       const scanInfoEl = document.getElementById('result-scan-info');
       if (result.isUnlimited) {
         scanInfoEl.textContent = 'Unlimited access';
@@ -610,21 +652,16 @@ const App = (() => {
         scanInfoEl.textContent = rem === 0
           ? 'No scans remaining this week'
           : `${rem} scan${rem === 1 ? '' : 's'} remaining this week`;
+      } else {
+        scanInfoEl.textContent = '';
       }
 
       ScreenManager.show('result');
       state = 'result';
 
-      // Speak the result
       await Audio.speak(sentences.en, sentences.my);
+      await Audio.speak('Hold anywhere to scan again.', 'Tahan di mana-mana untuk mengimbas semula.');
 
-      // Tell user to hold again — critical for visually impaired
-      await Audio.speak(
-        'Hold anywhere to scan again.',
-        'Tahan di mana-mana untuk mengimbas semula.'
-      );
-
-      // Listen for next hold
       const resultEl = document.getElementById('screen-result');
       function onResultHold() {
         resultEl.removeEventListener('mousedown',  onResultHold);
@@ -638,7 +675,6 @@ const App = (() => {
       console.error('Detection error:', err.name, err.message);
       document.getElementById('scan-spinner').classList.remove('visible');
 
-      // Handle weekly limit specifically
       if (err.isLimitReached) {
         ScreenManager.show('limit');
         state = 'limit';
@@ -664,91 +700,13 @@ const App = (() => {
     ScreenManager.show('camera');
     state = 'camera';
     HoldDetection.enable();
-    await Audio.speak(
-      'Ready. Hold to scan again.',
-      'Sedia. Tahan untuk mengimbas semula.'
-    );
+    await Audio.speak('Ready. Hold to scan again.', 'Sedia. Tahan untuk mengimbas semula.');
   }
 
   function showError(msg) {
     document.getElementById('error-msg').textContent = msg;
     ScreenManager.show('error');
     state = 'error';
-  }
-
-  return { init };
-})();
-
-/* ═══════════════════════════════════════════════════════
-   MODULE: UNLOCK MANAGER
-   Handles the email unlock bar at the bottom of the screen.
-   On submit: calls /api/unlock, stores token in localStorage.
-═══════════════════════════════════════════════════════ */
-const UnlockManager = (() => {
-  const STORAGE_KEY = 'visionweb_token';
-
-  function init() {
-    const btn   = document.getElementById('unlock-btn');
-    const input = document.getElementById('unlock-input');
-    const msg   = document.getElementById('unlock-msg');
-
-    // If already unlocked, show status
-    if (localStorage.getItem(STORAGE_KEY)) {
-      msg.textContent = '✓ Unlimited access active';
-      msg.className   = 'success';
-      input.value     = '';
-      input.placeholder = 'Unlimited access active';
-      input.disabled  = true;
-      input.classList.add('verified');  // green border on reload too
-      btn.disabled    = true;
-      btn.textContent = 'Unlocked';
-    }
-
-    btn.addEventListener('click', () => attemptUnlock(input, msg));
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') attemptUnlock(input, msg);
-    });
-  }
-
-  async function attemptUnlock(input, msg) {
-    const email = input.value.trim();
-    if (!email) return;
-
-    msg.textContent = 'Verifying…';
-    msg.className   = '';
-
-    try {
-      const resp = await fetch('/api/unlock', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email })
-      });
-
-      const data = await resp.json();
-
-      if (!resp.ok || !data.token) {
-        msg.textContent = data.error || 'Email not recognised';
-        msg.className   = 'error';
-        input.classList.remove('verified'); // no green — don't hint on failure
-        return;
-      }
-
-      // Store token
-      localStorage.setItem(STORAGE_KEY, data.token);
-      msg.textContent   = '✓ Unlimited access unlocked!';
-      msg.className     = 'success';
-      input.value       = '';
-      input.placeholder = 'Unlimited access active';
-      input.disabled    = true;
-      input.classList.add('verified');       // green border highlight
-      const btn         = document.getElementById('unlock-btn');
-      btn.disabled      = true;
-      btn.textContent   = 'Unlocked';
-
-    } catch {
-      msg.textContent = 'Connection error. Please try again.';
-      msg.className   = 'error';
-    }
   }
 
   return { init };
