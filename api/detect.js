@@ -8,7 +8,7 @@
  *  3. Claude Haiku vision inference
  *
  * Endpoint: POST /api/detect
- * Body:     { image: "<base64 JPEG>", token?: "<unlock token>" }
+ * Body:     { image: "<base64 JPEG>", sessionId: "<uuid>", token?: "<unlock token>" }
  * Returns:  { mode, description, descriptionMY, score, scansUsed, scansRemaining }
  */
 
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
   }
 
   // ── Validate image ──
-  const { image, token } = req.body;
+  const { image, token, sessionId } = req.body;
   if (!image || typeof image !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid image data' });
   }
@@ -42,12 +42,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Image too large' });
   }
 
-  // ── Build session key from IP + User-Agent (hashed — no PII stored) ──
-  const ip        = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-  const ua        = req.headers['user-agent'] || 'unknown';
+  // ── Session key: UUID generated in browser, stored in localStorage ──
+  // More accurate than IP+UA — tracks per browser instance, not per network
+  if (!sessionId || typeof sessionId !== 'string' || !/^[a-f0-9-]{36}$/.test(sessionId)) {
+    return res.status(400).json({ error: 'Missing or invalid session ID' });
+  }
+  // Hash the UUID before storing — no raw client IDs in the database
   const sessionKey = crypto
     .createHash('sha256')
-    .update(`${ip}:${ua}`)
+    .update(sessionId)
     .digest('hex')
     .slice(0, 32);
 
