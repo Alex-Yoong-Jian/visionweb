@@ -71,8 +71,19 @@
     .consent-body { font-size: 14px; color: #555; line-height: 1.75; }
     .consent-body strong { color: #111; }
     .consent-divider { height: 1px; background: #eee; }
-    .consent-tap { font-size: 15px; font-weight: 600; color: #1F4E79; text-align: center; padding: 16px; background: #F0F4F8; border-radius: 12px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
-    .consent-tap:active, .consent-tap.pulse { border-color: #1F4E79; }
+    .consent-tap {
+      font-size: 15px; font-weight: 600; color: #fff;
+      text-align: center; padding: 16px 24px;
+      background: #1F4E79; border-radius: 12px;
+      cursor: pointer; border: none; width: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      transition: background 0.2s, transform 0.1s;
+      pointer-events: none; opacity: 0.45;
+    }
+    .consent-tap.ready {
+      pointer-events: auto; opacity: 1;
+    }
+    .consent-tap.ready:active { background: #163c5e; transform: scale(0.98); }
     .consent-hint { font-size: 12px; color: #aaa; text-align: center; }
 
     /* ── Report screen ── */
@@ -195,7 +206,7 @@
         This data is collected in accordance with Malaysia's Personal Data Protection Act (PDPA) and is used solely to operate and improve this service. No data is sold or shared with third parties.
       </div>
       <div class="consent-divider"></div>
-      <div class="consent-tap" id="consent-tap-btn">Tap anywhere to accept and continue</div>
+      <button class="consent-tap" id="consent-tap-btn" disabled>I Accept — Continue</button>
       <div class="consent-hint">Audio guidance is available — listen for instructions</div>
     </div>
   </div>
@@ -310,7 +321,7 @@
 
   <!-- Unlock bar: hidden until arrow is tapped -->
   <div id="unlock-bar">
-    <input type="email" id="unlock-input" placeholder="Enter secret key" autocomplete="email" />
+    <input type="email" id="unlock-input" placeholder="Enter email to unlock unlimited scans" autocomplete="email" />
     <button id="unlock-btn">Unlock</button>
     <div id="unlock-msg"></div>
   </div>
@@ -460,9 +471,18 @@ const TickSound = (() => {
     running = false; clearInterval(tickTimer); tickTimer = null;
   }
 
+  // Screens where the tick sound should fire on tap
+  const TICK_SCREENS = ['camera', 'result'];
+
   function initGlobal() {
-    document.addEventListener('mousedown',  () => playBeep());
-    document.addEventListener('touchstart', () => playBeep(), { passive: true });
+    function shouldBeep() {
+      // Only beep when the active screen is camera or result
+      return TICK_SCREENS.some(id =>
+        !document.getElementById('screen-' + id).classList.contains('hidden')
+      );
+    }
+    document.addEventListener('mousedown',  () => { if (shouldBeep()) playBeep(); });
+    document.addEventListener('touchstart', () => { if (shouldBeep()) playBeep(); }, { passive: true });
   }
 
   return { start, stop, initGlobal };
@@ -753,26 +773,36 @@ const ConsentManager = (() => {
   async function show(onAccepted) {
     ScreenManager.show('consent');
 
-    // Speak the notice — user must hear it before tapping
+    const btn = document.getElementById('consent-tap-btn');
+    let audioComplete = false;  // JS gate — not relying on disabled attr for iOS touch
+
+    // Button dimmed and non-interactive until audio finishes
+    btn.disabled = true;
+    btn.classList.remove('ready');
+
+    // Speak the full notice — user cannot proceed until this completes
     await Audio.speak(
-      'Welcome to VisionWeb. Before you begin, please be aware that this app collects your device information and usage data to operate the weekly scan limit. If you submit an issue report, your email will also be stored. Tap anywhere on the screen to accept and continue.',
-      'Selamat datang ke VisionWeb. Sebelum bermula, sila ambil perhatian bahawa aplikasi ini mengumpul maklumat peranti dan data penggunaan anda. Ketuk mana-mana bahagian skrin untuk menerima dan meneruskan.'
+      'Welcome to VisionWeb. Before you begin, please be aware that this app collects your device information and usage data to operate the weekly scan limit. If you submit an issue report, your email will also be stored. Please tap the Accept and Continue button at the bottom of the screen to proceed.',
+      'Selamat datang ke VisionWeb. Sebelum bermula, sila ambil perhatian bahawa aplikasi ini mengumpul maklumat peranti dan data penggunaan anda. Sila ketuk butang Terima di bawah skrin untuk meneruskan.'
     );
 
-    // After audio completes, pulse the button to draw attention
-    const btn = document.getElementById('consent-tap-btn');
-    btn.classList.add('pulse');
+    // Audio complete — now allow the button
+    audioComplete = true;
+    btn.disabled = false;
+    btn.classList.add('ready');
 
-    // Listen for tap anywhere on the consent screen
-    const el = document.getElementById('screen-consent');
-    function onTap() {
-      el.removeEventListener('mousedown',  onTap);
-      el.removeEventListener('touchstart', onTap);
+    // Only this button can advance the flow.
+    // The JS flag double-checks on iOS where disabled is sometimes bypassed.
+    function onAccept(e) {
+      if (!audioComplete) return;  // guard against early tap on iOS
+      e.stopPropagation();
+      btn.removeEventListener('click',      onAccept);
+      btn.removeEventListener('touchend',   onAccept);
       recordConsent();
       onAccepted();
     }
-    el.addEventListener('mousedown',  onTap);
-    el.addEventListener('touchstart', onTap, { passive: true });
+    btn.addEventListener('click',    onAccept);
+    btn.addEventListener('touchend', onAccept, { passive: true });
   }
 
   return { hasConsented, show };
@@ -905,8 +935,12 @@ const ReportManager = (() => {
   }
 
   function close() {
-    // Return to whichever screen was showing before — default to prompt
-    ScreenManager.show('prompt');
+    // Re-enter the app flow properly via App so the state machine
+    // is reset and the hold-to-scan listener is re-attached.
+    // Simply showing the prompt screen via ScreenManager would
+    // leave the app stuck — camera doesn't restart and no hold
+    // listener is wired up.
+    App.showPrompt();
   }
 
   async function submit() {
@@ -1134,7 +1168,7 @@ const App = (() => {
     state = 'error';
   }
 
-  return { init };
+  return { init, showPrompt };
 })();
 
 window.addEventListener('DOMContentLoaded', () => {
