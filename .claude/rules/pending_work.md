@@ -1,81 +1,81 @@
 # Pending Work
 
-## Immediate — fixes done in index.html, needs deployment
+## Done — deployed to dev (v3.13.3)
 
-### Consent button unlock
-**Status:** Done in `index.html`, pushed to GitHub.
-The consent Accept button is now enabled immediately on screen show. Audio plays
-on first tap anywhere on the consent screen (browser gesture requirement). Users
-no longer need to wait for audio to finish before tapping Accept.
-
-### Consent audio fix
-**Status:** Done in `index.html`, pushed to GitHub.
-Audio on the consent screen now fires inside a `touchstart`/`click` listener
-on the screen element rather than on screen initialisation. This resolves the
-silent failure caused by mobile browser autoplay restrictions.
-
----
-
-## Immediate — pending deployment to production
-
-### Git push v3.13.0
-Run:
-```bash
-git add index.html api/detect.js api/report.js
-git commit -m "v3.13.0 — consent screen, device tracking, report an issue, iOS fixes"
-git push
-```
-
-### Supabase migration — `03_add_device_tracking.sql`
-This migration must be run in the Supabase SQL Editor **before** deploying v3.13.0.
-It adds the `browser`, `os`, `device_type`, `brand`, `model` columns to `scan_sessions`
-and creates the `issue_reports` table. Without this, `api/detect.js` and `api/report.js`
-will fail on device tracking column writes.
+- Consent button enabled immediately, no audio gate
+- Consent audio fires on first gesture (mobile autoplay fix)
+- Claude Haiku prompt rewritten — specific identification, `uncertain` mode at confidence < 0.6
+- `uncertain` mode handled in ResultBuilder and ResultDisplay
+- Device tracking columns added to `scan_sessions`, wired into detect.js INSERT
+- `api/report.js` created — issue reports submit to Supabase `issue_reports` table
+- `03_add_device_tracking.sql` migration run on test DB
+- CSP meta tag removed — vercel.json header is authoritative
+- Scan-again listener attached before audio (no hostage behaviour)
+- Edge mobile consent button fix — startAudio guards against button tap target
 
 ---
 
-## Immediate — code fix still needed
+## In progress — admin panel (in-app, protected screen)
 
-### Claude Haiku hallucination — prompt rewrite in `api/detect.js`
-**Status:** Identified, not yet implemented.
-Claude Haiku sometimes misidentifies niche objects (e.g. gym gripper identified as
-skipping rope). Root causes: vague prompt language, no uncertainty path, image
-compression degrading fine detail.
+**Goal:** Admin can view all submitted issue reports pulled from Supabase.
+**Architecture:** Protected screen inside existing app (not a separate repo).
+**Auth:** Secret PIN validated server-side against `ADMIN_PIN` env var.
+**Access:** Tap version badge 3 times → PIN entry → admin screen shown.
 
-**Fix required in `api/detect.js` system prompt:**
-- Replace "describe" with "identify as specifically as possible"
-- Add `"uncertain"` as a third valid mode (when confidence < 0.6)
-- Instruct Claude to prefer specific names over vague categories
-- Remove the "noun phrase" instruction — ask for specific identification instead
+**Features (phase 1):**
+- List all issues: ID, email, title, created date, elapsed time, device info
+- View full issue detail
+- Rate limit: max 5 reports per browser per week (enforced in api/report.js)
 
-**Fix required in `index.html` (`App.onHoldComplete`):**
-- Handle `mode === 'uncertain'` response
-- Speak: `'I can see an object but I'm not certain what it is. Please try again from a different angle.'`
+**New files needed:**
+- `api/admin.js` — fetches paginated issue list from Supabase (requires valid session token)
+- `api/admin-auth.js` — validates PIN, returns signed session token
+- `js/admin.js` — admin screen module
+- New screen: `screen-admin` in index.html
+- CSS for admin screen in styles.css
+
+**New env vars needed:**
+- `ADMIN_PIN` — secret PIN for admin access (set in Vercel for both Production and Preview)
+
+---
+
+## Immediate — needs production deploy
+
+### Merge dev → main
+All fixes in dev (v3.13.3) need to be merged to main and deployed to production
+once testing is complete.
+
+### Supabase migration — production DB
+`03_add_device_tracking.sql` has only been run on the test DB.
+Must be run on the production Supabase project before deploying to production.
+
+---
+
+## Deferred — requires custom domain ownership
+
+### Custom domain
+Both items below require owning a domain (e.g. visionweb.app, ~$10–15/year).
+Decision: defer until app features are polished.
+
+### Resend email notifications
+When a user submits an issue report, send an admin notification email via Resend.
+Requires verified sending domain in Resend.
+- From: `noreply@yourdomain.com`
+- To: admin's personal email
+- New env var: `RESEND_API_KEY`, `ADMIN_EMAIL`
+
+### Cloudflare DDoS + WAF protection
+Put custom domain behind Cloudflare free tier for DDoS protection, WAF, bot filtering.
+Steps documented — ready to execute once domain is purchased.
 
 ---
 
 ## Planned — not started
 
-### Admin panel (`visionweb-admin.vercel.app`)
-A separate Vercel project for managing VisionWeb data.
-
-**Architecture decided:**
-- Separate repo: `visionweb-admin`
-- Auth: Supabase Auth (email invite flow) — not custom auth
-- Features: view issue reports, update status, delete, export CSV; manage allowed_emails
-- Email delivery for invites: Resend (resend.com, free tier 3,000/month)
-
-**New env vars needed for admin project:**
-- `JWT_SECRET`
-- `RESEND_API_KEY`
-- `ADMIN_FROM_EMAIL`
-
-**Zero impact on existing VisionWeb public app** — reads same Supabase database,
-no shared code.
-
----
-
-## Under evaluation
+### Report rate limiting
+Max 5 issue reports per browser per week.
+Enforce in `api/report.js` by hashing sessionId and counting against `issue_reports`.
+Requires `sessionId` to be sent from `js/report.js` with each submission.
 
 ### Real-time navigation / continuous scanning mode
 Not started. Requires a hybrid on-device + Claude architecture.
