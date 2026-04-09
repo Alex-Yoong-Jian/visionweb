@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self';
+             script-src 'self';
+             style-src 'self';
+             media-src mediastream: blob:;
+             connect-src https://api.anthropic.com https://*.supabase.co;" />
+  <title>VisionWeb</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- Fixed UI chrome — visible across all screens -->
+  <div id="version-badge">v3.13.2</div>
+  <div id="report-btn-trigger" onclick="ReportManager.open()">Report an Issue</div>
+  <div id="unlock-toggle">&#8679;</div>
+
+  <!-- SCREEN: LOADING -->
+  <div class="screen" id="screen-loading">
+    <div class="loader-ring"></div>
+    <div class="loader-text">Starting VisionWeb…</div>
+    <div class="loader-sub" id="loader-sub">Initialising…</div>
+  </div>
+
+  <!-- SCREEN: CONSENT -->
+  <div class="screen hidden" id="screen-consent">
+    <div class="consent-wrap">
+      <div class="consent-badge">VisionWeb — Before you begin</div>
+      <div class="consent-title">We collect a few details to improve your experience</div>
+      <div class="consent-body">
+        By using VisionWeb, you agree that we may collect the following information:
+        <br><br>
+        <strong>• Device information</strong> — your browser name, operating system, and device type (e.g. mobile or desktop).<br><br>
+        <strong>• Usage data</strong> — a scan count associated with your browser session to enforce a weekly usage limit of 10 scans.<br><br>
+        <strong>• Report data</strong> — if you submit an issue report, your email address and message are stored.<br><br>
+        This data is collected in accordance with Malaysia's Personal Data Protection Act (PDPA) and is used solely to operate and improve this service. No data is sold or shared with third parties.
+      </div>
+      <div class="consent-divider"></div>
+      <!-- No disabled attribute — JS enables immediately on show -->
+      <button class="consent-tap" id="consent-tap-btn">I Accept — Continue</button>
+      <div class="consent-hint">Tap anywhere to hear this notice read aloud</div>
+    </div>
+  </div>
+
+  <!-- SCREEN: PROMPT -->
+  <div class="screen hidden" id="screen-prompt">
+    <div class="app-name">VisionWeb</div>
+    <div class="prompt-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><circle cx="12" cy="12" r="3"/></svg>
+    </div>
+    <div class="prompt-text-en">Hold the screen<br>to scan</div>
+    <div class="prompt-text-my">Tahan skrin<br>untuk mengimbas</div>
+    <div class="prompt-hint">Hold anywhere for 3.5 seconds</div>
+  </div>
+
+  <!-- SCREEN: CAMERA -->
+  <div class="screen hidden" id="screen-camera">
+    <video id="camera-video" autoplay playsinline muted></video>
+    <div class="cam-overlay">
+      <div class="cam-status" id="cam-status">Hold to scan</div>
+      <div class="progress-wrap">
+        <svg class="progress-svg" viewBox="0 0 220 220">
+          <circle class="progress-track" cx="110" cy="110" r="100"/>
+          <circle class="progress-fill" id="progress-ring" cx="110" cy="110" r="100"/>
+        </svg>
+      </div>
+      <div class="reticle">
+        <div class="reticle-corner tl"></div>
+        <div class="reticle-corner tr"></div>
+        <div class="reticle-corner bl"></div>
+        <div class="reticle-corner br"></div>
+      </div>
+      <div class="cam-instruction">
+        <div class="cam-instruction-en" id="cam-instruction-en">Hold anywhere to scan</div>
+        <div class="cam-instruction-my" id="cam-instruction-my">Tahan di mana-mana untuk mengimbas</div>
+      </div>
+      <div class="scan-spinner-wrap" id="scan-spinner">
+        <div class="scan-spinner"></div>
+        <div class="scan-text-en">Analysing…</div>
+        <div class="scan-text-my">Sedang menganalisis…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN: RESULT -->
+  <div class="screen hidden" id="screen-result">
+    <div class="result-label">Detected</div>
+    <div class="result-mode-badge" id="result-mode">—</div>
+    <div class="result-confidence" id="result-confidence"></div>
+    <div class="result-divider"></div>
+    <div class="result-text-en" id="result-text-en">—</div>
+    <div class="result-text-my" id="result-text-my">—</div>
+    <div class="result-scan-info" id="result-scan-info"></div>
+    <div class="result-prompt">Hold anywhere to scan again</div>
+  </div>
+
+  <!-- SCREEN: LIMIT (HTTP 429 — Too Many Requests) -->
+  <div class="screen hidden" id="screen-limit">
+    <div class="limit-icon">&#9203;</div>
+    <div class="limit-title">Weekly limit reached</div>
+    <div class="limit-msg">You have used all 10 scans for this week.<br>Your limit resets every Monday.</div>
+    <div class="limit-sub">Had limu mingguan dicapai.<br>Had anda ditetapkan semula setiap hari Isnin.</div>
+  </div>
+
+  <!-- SCREEN: ERROR -->
+  <div class="screen hidden" id="screen-error">
+    <div class="error-title">Something went wrong</div>
+    <div class="error-msg" id="error-msg">Please reload the page and try again.</div>
+  </div>
+
+  <!-- SCREEN: REPORT AN ISSUE -->
+  <div class="screen hidden" id="screen-report">
+    <div class="report-wrap">
+      <div class="report-title">Report an Issue</div>
+      <div class="report-sub">All fields are required</div>
+
+      <div class="report-field">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <label class="report-label">Your Email</label>
+        </div>
+        <input class="report-input" type="email" id="report-email" placeholder="your@email.com" maxlength="254" />
+        <div class="report-error" id="err-email">Please enter a valid email address</div>
+      </div>
+
+      <div class="report-field">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <label class="report-label">Title</label>
+          <span class="report-counter" id="count-title">0 / 50</span>
+        </div>
+        <input class="report-input" type="text" id="report-title" placeholder="Brief summary of the issue" maxlength="50" />
+        <div class="report-error" id="err-title">Title is required (max 50 characters)</div>
+      </div>
+
+      <div class="report-field">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <label class="report-label">Description</label>
+          <span class="report-counter" id="count-desc">0 / 500</span>
+        </div>
+        <textarea class="report-input" id="report-desc" placeholder="Describe the issue in detail — what happened, when, and what you expected" rows="6" maxlength="500"></textarea>
+        <div class="report-error" id="err-desc">Description is required (max 500 characters)</div>
+      </div>
+
+      <div class="report-success" id="report-success">
+        &#9989; Report submitted successfully.<br>Thank you for helping improve VisionWeb.
+      </div>
+
+      <button class="report-btn" id="report-submit-btn" onclick="ReportManager.submit()">Submit Report</button>
+      <div class="report-back" onclick="ReportManager.close()">&#8592; Back</div>
+    </div>
+  </div>
+
+  <!-- Unlock bar: hidden until arrow toggle is tapped -->
+  <div id="unlock-bar">
+    <input type="email" id="unlock-input" placeholder="Enter email to unlock unlimited scans" autocomplete="email" />
+    <button id="unlock-btn">Unlock</button>
+    <div id="unlock-msg"></div>
+  </div>
+
+  <!-- JS modules — load order matters: dependencies before dependants -->
+  <script src="js/session.js"></script>
+  <script src="js/tick.js"></script>
+  <script src="js/screen.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/hold.js"></script>
+  <script src="js/detector.js"></script>
+  <script src="js/result.js"></script>
+  <script src="js/consent.js"></script>
+  <script src="js/unlock.js"></script>
+  <script src="js/report.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

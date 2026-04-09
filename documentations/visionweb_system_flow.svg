@@ -1,0 +1,297 @@
+<svg viewBox="0 0 1500 780" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <!-- Arrow marker -->
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1F4E79"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#C0392B"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1D6A3A"/>
+    </marker>
+    <!-- Drop shadow -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#00000022"/>
+    </filter>
+    <!-- Subtle gradient for node backgrounds -->
+    <linearGradient id="nodeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#f0f4f8"/>
+    </linearGradient>
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fff5f5"/>
+      <stop offset="100%" style="stop-color:#fde8e8"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0faf4"/>
+      <stop offset="100%" style="stop-color:#e2f0e8"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8f0fb"/>
+      <stop offset="100%" style="stop-color:#d5e4f5"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1500" height="780" fill="#F8FAFB" rx="12"/>
+
+  <!-- Title -->
+  <rect x="0" y="0" width="1500" height="52" fill="#1F4E79" rx="12"/>
+  <rect x="0" y="40" width="1500" height="12" fill="#1F4E79"/>
+  <text x="750" y="32" text-anchor="middle" fill="white" font-size="17" font-weight="700" letter-spacing="0.5">VisionWeb — System Flow Diagram</text>
+
+  <!-- ═══════════════════════════════════════
+       ROW 1: Main happy path (y=160 centres)
+       Nodes at x: 90, 240, 390, 540, 690, 840, 1020, 1200, 1380
+       Node width=110, height=90, rx=10
+  ════════════════════════════════════════ -->
+
+  <!-- ── NODE 1: Page Load ── -->
+  <g filter="url(#shadow)">
+    <rect x="30" y="115" width="110" height="90" rx="10" fill="url(#nodeGrad)" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <!-- Document icon -->
+  <rect x="72" y="126" width="28" height="36" rx="3" fill="#2E75B6" opacity="0.15" stroke="#2E75B6" stroke-width="1.5"/>
+  <path d="M72 137 L100 137" stroke="#2E75B6" stroke-width="1.5"/>
+  <path d="M72 143 L100 143" stroke="#2E75B6" stroke-width="1.5"/>
+  <path d="M72 149 L93 149" stroke="#2E75B6" stroke-width="1.5"/>
+  <path d="M91 126 L100 135" stroke="#2E75B6" stroke-width="1.5" fill="none"/>
+  <path d="M91 126 L91 135 L100 135" fill="#e8f0fb" stroke="#2E75B6" stroke-width="1"/>
+  <text x="85" y="173" text-anchor="middle" fill="#1F4E79" font-size="11" font-weight="700">Page Load</text>
+  <text x="85" y="187" text-anchor="middle" fill="#666" font-size="9.5">Collect Device Info</text>
+  <text x="85" y="199" text-anchor="middle" fill="#666" font-size="9.5">(background)</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="141" y1="160" x2="173" y2="160" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="157" y="152" text-anchor="middle" fill="#1F4E79" font-size="8.5">First visit or</text>
+  <text x="157" y="162" text-anchor="middle" fill="#1F4E79" font-size="8.5">weekly reset</text>
+
+  <!-- ── NODE 2: Consent Screen ── -->
+  <g filter="url(#shadow)">
+    <rect x="175" y="115" width="110" height="90" rx="10" fill="url(#nodeGrad)" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <!-- Shield icon -->
+  <path d="M230 126 L248 133 L248 148 Q248 158 230 165 Q212 158 212 148 L212 133 Z" fill="#2E75B6" opacity="0.12" stroke="#2E75B6" stroke-width="1.5"/>
+  <path d="M224 145 L228 150 L237 140" stroke="#1D6A3A" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <text x="230" y="178" text-anchor="middle" fill="#1F4E79" font-size="11" font-weight="700">Consent Screen</text>
+  <text x="230" y="191" text-anchor="middle" fill="#666" font-size="9.5">PDPA notice</text>
+  <text x="230" y="203" text-anchor="middle" fill="#666" font-size="9.5">audio + Accept btn</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="286" y1="160" x2="318" y2="160" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="302" y="152" text-anchor="middle" fill="#1F4E79" font-size="8.5">Audio done +</text>
+  <text x="302" y="162" text-anchor="middle" fill="#1F4E79" font-size="8.5">Accept tapped</text>
+
+  <!-- ── NODE 3: Prompt Screen ── -->
+  <g filter="url(#shadow)">
+    <rect x="320" y="115" width="110" height="90" rx="10" fill="url(#nodeGrad)" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <!-- Speech bubble icon -->
+  <rect x="348" y="126" width="46" height="30" rx="6" fill="#2E75B6" opacity="0.12" stroke="#2E75B6" stroke-width="1.5"/>
+  <path d="M360 156 L356 163 L368 156" fill="#2E75B6" opacity="0.3" stroke="#2E75B6" stroke-width="1"/>
+  <line x1="355" y1="135" x2="387" y2="135" stroke="#2E75B6" stroke-width="1.5"/>
+  <line x1="355" y1="141" x2="387" y2="141" stroke="#2E75B6" stroke-width="1.5"/>
+  <line x1="355" y1="147" x2="378" y2="147" stroke="#2E75B6" stroke-width="1.5"/>
+  <text x="375" y="178" text-anchor="middle" fill="#1F4E79" font-size="11" font-weight="700">Prompt Screen</text>
+  <text x="375" y="191" text-anchor="middle" fill="#666" font-size="9.5">"Hold to scan"</text>
+  <text x="375" y="203" text-anchor="middle" fill="#666" font-size="9.5">EN + MY audio</text>
+
+  <!-- Arrow 3→4 -->
+  <line x1="431" y1="160" x2="463" y2="160" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="447" y="152" text-anchor="middle" fill="#1F4E79" font-size="8.5">Touch</text>
+  <text x="447" y="162" text-anchor="middle" fill="#1F4E79" font-size="8.5">event</text>
+
+  <!-- ── NODE 4: Hold Detection ── -->
+  <g filter="url(#shadow)">
+    <rect x="465" y="115" width="110" height="90" rx="10" fill="url(#nodeGrad)" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <!-- Touch/finger icon -->
+  <circle cx="520" cy="143" r="16" fill="#2E75B6" opacity="0.12" stroke="#2E75B6" stroke-width="1.5"/>
+  <path d="M516 143 Q520 136 524 143" stroke="#2E75B6" stroke-width="1.5" fill="none"/>
+  <circle cx="520" cy="148" r="3" fill="#2E75B6"/>
+  <text x="520" y="178" text-anchor="middle" fill="#1F4E79" font-size="11" font-weight="700">Hold Detection</text>
+  <text x="520" y="191" text-anchor="middle" fill="#666" font-size="9.5">3.5s progress ring</text>
+  <text x="520" y="203" text-anchor="middle" fill="#666" font-size="9.5">+ tick sound</text>
+
+  <!-- Arrow 4→5 -->
+  <line x1="576" y1="160" x2="608" y2="160" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="592" y="152" text-anchor="middle" fill="#1F4E79" font-size="8.5">3.5s hold</text>
+  <text x="592" y="162" text-anchor="middle" fill="#1F4E79" font-size="8.5">complete</text>
+
+  <!-- ── NODE 5: Frame Capture ── -->
+  <g filter="url(#shadow)">
+    <rect x="610" y="115" width="110" height="90" rx="10" fill="url(#nodeGrad)" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <!-- Camera icon -->
+  <rect x="636" y="132" width="48" height="32" rx="4" fill="#2E75B6" opacity="0.12" stroke="#2E75B6" stroke-width="1.5"/>
+  <circle cx="660" cy="148" r="9" fill="none" stroke="#2E75B6" stroke-width="1.5"/>
+  <circle cx="660" cy="148" r="5" fill="#2E75B6" opacity="0.3"/>
+  <rect x="652" y="127" width="12" height="6" rx="2" fill="#2E75B6" opacity="0.4"/>
+  <text x="665" y="178" text-anchor="middle" fill="#1F4E79" font-size="11" font-weight="700">Frame Capture</text>
+  <text x="665" y="191" text-anchor="middle" fill="#666" font-size="9.5">800×600px max</text>
+  <text x="665" y="203" text-anchor="middle" fill="#666" font-size="9.5">JPEG 80% quality</text>
+
+  <!-- Arrow 5→6 -->
+  <line x1="721" y1="160" x2="753" y2="160" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="737" y="148" text-anchor="middle" fill="#1F4E79" font-size="8">base64 image</text>
+  <text x="737" y="158" text-anchor="middle" fill="#1F4E79" font-size="8">sessionId</text>
+  <text x="737" y="168" text-anchor="middle" fill="#1F4E79" font-size="8">deviceInfo</text>
+
+  <!-- ── NODE 6: POST /api/detect ── -->
+  <g filter="url(#shadow)">
+    <rect x="755" y="115" width="120" height="90" rx="10" fill="url(#blueGrad)" stroke="#1F4E79" stroke-width="2"/>
+  </g>
+  <!-- Server/function icon -->
+  <rect x="789" y="127" width="52" height="36" rx="4" fill="#1F4E79" opacity="0.15" stroke="#1F4E79" stroke-width="1.5"/>
+  <line x1="789" y1="138" x2="841" y2="138" stroke="#1F4E79" stroke-width="1"/>
+  <line x1="789" y1="145" x2="841" y2="145" stroke="#1F4E79" stroke-width="1"/>
+  <circle cx="797" cy="133" r="2" fill="#1F4E79"/>
+  <circle cx="804" cy="133" r="2" fill="#1F4E79"/>
+  <text x="815" y="177" text-anchor="middle" fill="#1F4E79" font-size="11" font-weight="700">POST /api/detect</text>
+  <text x="815" y="190" text-anchor="middle" fill="#1F4E79" font-size="9.5">Vercel Serverless</text>
+  <text x="815" y="203" text-anchor="middle" fill="#1F4E79" font-size="9.5">Function</text>
+
+  <!-- Arrow 6→7 (down to Supabase) -->
+  <line x1="815" y1="206" x2="815" y2="268" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="852" y="238" text-anchor="start" fill="#1F4E79" font-size="8.5">SHA-256 hash</text>
+  <text x="852" y="250" text-anchor="start" fill="#1F4E79" font-size="8.5">+ week key</text>
+
+  <!-- ── NODE 7: Supabase Scan Check ── -->
+  <g filter="url(#shadow)">
+    <rect x="755" y="270" width="120" height="90" rx="10" fill="url(#nodeGrad)" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <!-- Database cylinder icon -->
+  <ellipse cx="815" cy="287" rx="22" ry="6" fill="#2E75B6" opacity="0.2" stroke="#2E75B6" stroke-width="1.5"/>
+  <rect x="793" y="287" width="44" height="24" fill="#2E75B6" opacity="0.1" stroke="#2E75B6" stroke-width="1.5"/>
+  <ellipse cx="815" cy="311" rx="22" ry="6" fill="#2E75B6" opacity="0.2" stroke="#2E75B6" stroke-width="1.5"/>
+  <text x="815" y="378" text-anchor="middle" fill="#1F4E79" font-size="11" font-weight="700">Supabase</text>
+  <text x="815" y="391" text-anchor="middle" fill="#666" font-size="9.5">scan_sessions</text>
+  <text x="815" y="403" text-anchor="middle" fill="#666" font-size="9.5">check + increment</text>
+
+  <!-- Arrow 7→ Limit (left, 429 branch) -->
+  <line x1="755" y1="315" x2="640" y2="315" stroke="#C0392B" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-red)"/>
+  <text x="697" y="308" text-anchor="middle" fill="#C0392B" font-size="8.5" font-weight="700">count ≥ 10</text>
+  <text x="697" y="320" text-anchor="middle" fill="#C0392B" font-size="8.5">no valid token</text>
+
+  <!-- ── NODE: HTTP 429 / Limit Screen ── -->
+  <g filter="url(#shadow)">
+    <rect x="530" y="270" width="110" height="90" rx="10" fill="url(#redGrad)" stroke="#C0392B" stroke-width="1.5"/>
+  </g>
+  <!-- Stop icon -->
+  <circle cx="585" cy="303" r="16" fill="#C0392B" opacity="0.15" stroke="#C0392B" stroke-width="1.5"/>
+  <line x1="575" y1="303" x2="595" y2="303" stroke="#C0392B" stroke-width="2.5"/>
+  <text x="585" y="378" text-anchor="middle" fill="#C0392B" font-size="11" font-weight="700">HTTP 429</text>
+  <text x="585" y="391" text-anchor="middle" fill="#C0392B" font-size="9.5">Too Many Requests</text>
+  <text x="585" y="404" text-anchor="middle" fill="#C0392B" font-size="9.5">Limit Screen shown</text>
+
+  <!-- Arrow 7→8 (right, allowed branch) -->
+  <line x1="876" y1="315" x2="918" y2="315" stroke="#1D6A3A" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <text x="897" y="307" text-anchor="middle" fill="#1D6A3A" font-size="8.5" font-weight="700">count &lt; 10</text>
+  <text x="897" y="319" text-anchor="middle" fill="#1D6A3A" font-size="8.5">or valid token</text>
+
+  <!-- ── NODE 8: Claude Haiku API ── -->
+  <g filter="url(#shadow)">
+    <rect x="920" y="270" width="120" height="90" rx="10" fill="url(#blueGrad)" stroke="#1F4E79" stroke-width="2"/>
+  </g>
+  <!-- AI/neural icon -->
+  <circle cx="980" cy="303" r="16" fill="#1F4E79" opacity="0.12" stroke="#1F4E79" stroke-width="1.5"/>
+  <circle cx="980" cy="303" r="5" fill="#1F4E79" opacity="0.4"/>
+  <line x1="968" y1="296" x2="975" y2="300" stroke="#1F4E79" stroke-width="1"/>
+  <line x1="968" y1="310" x2="975" y2="306" stroke="#1F4E79" stroke-width="1"/>
+  <line x1="992" y1="296" x2="985" y2="300" stroke="#1F4E79" stroke-width="1"/>
+  <line x1="992" y1="310" x2="985" y2="306" stroke="#1F4E79" stroke-width="1"/>
+  <circle cx="966" cy="294" r="3" fill="#1F4E79" opacity="0.5"/>
+  <circle cx="966" cy="312" r="3" fill="#1F4E79" opacity="0.5"/>
+  <circle cx="994" cy="294" r="3" fill="#1F4E79" opacity="0.5"/>
+  <circle cx="994" cy="312" r="3" fill="#1F4E79" opacity="0.5"/>
+  <text x="980" y="378" text-anchor="middle" fill="#1F4E79" font-size="11" font-weight="700">Claude Haiku API</text>
+  <text x="980" y="391" text-anchor="middle" fill="#1F4E79" font-size="9.5">claude-haiku-</text>
+  <text x="980" y="403" text-anchor="middle" fill="#1F4E79" font-size="9.5">4-5-20251001</text>
+
+  <!-- Arrow 8→6 (return up — response) -->
+  <path d="M875 295 Q900 270 875 260 Q860 255 835 260 Q810 265 810 275" stroke="#1F4E79" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <text x="895" y="262" text-anchor="middle" fill="#1F4E79" font-size="8">mode, description</text>
+  <text x="895" y="272" text-anchor="middle" fill="#1F4E79" font-size="8">descriptionMY, score</text>
+
+  <!-- Arrow 6→9 (from /api/detect right to Result Screen) -->
+  <line x1="876" y1="160" x2="1073" y2="160" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="975" y="152" text-anchor="middle" fill="#1D6A3A" font-size="8.5">JSON result returned</text>
+  <text x="975" y="164" text-anchor="middle" fill="#666" font-size="8">to browser</text>
+
+  <!-- ── NODE 9: Result Screen ── -->
+  <g filter="url(#shadow)">
+    <rect x="1075" y="115" width="120" height="90" rx="10" fill="url(#greenGrad)" stroke="#1D6A3A" stroke-width="1.5"/>
+  </g>
+  <!-- Display/monitor icon -->
+  <rect x="1103" y="127" width="64" height="40" rx="4" fill="#1D6A3A" opacity="0.12" stroke="#1D6A3A" stroke-width="1.5"/>
+  <line x1="1103" y1="138" x2="1167" y2="138" stroke="#1D6A3A" stroke-width="1"/>
+  <path d="M1124 167 L1120 175 L1150 175 L1146 167" fill="#1D6A3A" opacity="0.2" stroke="#1D6A3A" stroke-width="1"/>
+  <line x1="1116" y1="175" x2="1154" y2="175" stroke="#1D6A3A" stroke-width="1.5"/>
+  <text x="1135" y="175" text-anchor="middle" fill="#1D6A3A" font-size="11" font-weight="700">Result Screen</text>
+  <text x="1135" y="188" text-anchor="middle" fill="#555" font-size="9.5">Mode badge, EN+MY</text>
+  <text x="1135" y="200" text-anchor="middle" fill="#555" font-size="9.5">score, scans left</text>
+
+  <!-- Arrow 9→10 -->
+  <line x1="1196" y1="160" x2="1228" y2="160" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1212" y="150" text-anchor="middle" fill="#1F4E79" font-size="8.5">EN + MY</text>
+  <text x="1212" y="162" text-anchor="middle" fill="#1F4E79" font-size="8.5">sentences</text>
+
+  <!-- ── NODE 10: Audio Feedback ── -->
+  <g filter="url(#shadow)">
+    <rect x="1230" y="115" width="120" height="90" rx="10" fill="url(#greenGrad)" stroke="#1D6A3A" stroke-width="1.5"/>
+  </g>
+  <!-- Speaker icon -->
+  <path d="M1268 135 L1256 143 L1256 157 L1268 165 Z" fill="#1D6A3A" opacity="0.3" stroke="#1D6A3A" stroke-width="1.5"/>
+  <path d="M1270 140 Q1280 150 1270 160" stroke="#1D6A3A" stroke-width="1.5" fill="none"/>
+  <path d="M1273 136 Q1287 150 1273 164" stroke="#1D6A3A" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <text x="1290" y="178" text-anchor="middle" fill="#1D6A3A" font-size="11" font-weight="700">Audio Feedback</text>
+  <text x="1290" y="191" text-anchor="middle" fill="#555" font-size="9.5">Web Speech API</text>
+  <text x="1290" y="203" text-anchor="middle" fill="#555" font-size="9.5">EN then MY</text>
+
+  <!-- ── EARLY RELEASE branch (from Hold Detection going down then back) ── -->
+  <path d="M520 206 L520 240 L375 240 L375 206" stroke="#C0392B" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arrow-red)"/>
+  <text x="447" y="255" text-anchor="middle" fill="#C0392B" font-size="8.5">Released &lt; 3.5s</text>
+  <text x="447" y="267" text-anchor="middle" fill="#C0392B" font-size="8.5">→ Reset, camera off</text>
+
+  <!-- ── LEGEND ── -->
+  <rect x="30" y="440" width="340" height="110" rx="8" fill="white" stroke="#DDD" stroke-width="1"/>
+  <text x="45" y="460" fill="#1F4E79" font-size="11" font-weight="700">Legend</text>
+  <!-- Happy path -->
+  <line x1="45" y1="478" x2="90" y2="478" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="100" y="482" fill="#444" font-size="10">Happy path / normal flow</text>
+  <!-- Error path -->
+  <line x1="45" y1="498" x2="90" y2="498" stroke="#C0392B" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-red)"/>
+  <text x="100" y="502" fill="#444" font-size="10">Error / limit exceeded path</text>
+  <!-- Success return -->
+  <line x1="45" y1="518" x2="90" y2="518" stroke="#1D6A3A" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <text x="100" y="522" fill="#444" font-size="10">Allowed / success condition</text>
+  <!-- API return -->
+  <line x1="45" y1="538" x2="90" y2="538" stroke="#1F4E79" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <text x="100" y="542" fill="#444" font-size="10">API response return</text>
+
+  <!-- ── STEP NUMBERS ── -->
+  <circle cx="85" cy="160" r="9" fill="#1F4E79"/>
+  <text x="85" y="164" text-anchor="middle" fill="white" font-size="9" font-weight="700">1</text>
+  <circle cx="230" cy="160" r="9" fill="#1F4E79"/>
+  <text x="230" y="164" text-anchor="middle" fill="white" font-size="9" font-weight="700">2</text>
+  <circle cx="375" cy="160" r="9" fill="#1F4E79"/>
+  <text x="375" y="164" text-anchor="middle" fill="white" font-size="9" font-weight="700">3</text>
+  <circle cx="520" cy="160" r="9" fill="#1F4E79"/>
+  <text x="520" y="164" text-anchor="middle" fill="white" font-size="9" font-weight="700">4</text>
+  <circle cx="665" cy="160" r="9" fill="#1F4E79"/>
+  <text x="665" y="164" text-anchor="middle" fill="white" font-size="9" font-weight="700">5</text>
+  <circle cx="815" cy="160" r="9" fill="#1F4E79"/>
+  <text x="815" y="164" text-anchor="middle" fill="white" font-size="9" font-weight="700">6</text>
+  <circle cx="815" cy="315" r="9" fill="#2E75B6"/>
+  <text x="815" y="319" text-anchor="middle" fill="white" font-size="9" font-weight="700">7</text>
+  <circle cx="980" cy="315" r="9" fill="#1F4E79"/>
+  <text x="980" y="319" text-anchor="middle" fill="white" font-size="9" font-weight="700">8</text>
+  <circle cx="1135" cy="160" r="9" fill="#1D6A3A"/>
+  <text x="1135" y="164" text-anchor="middle" fill="white" font-size="9" font-weight="700">9</text>
+  <circle cx="1290" cy="160" r="9" fill="#1D6A3A"/>
+  <text x="1290" y="164" text-anchor="middle" fill="white" font-size="9" font-weight="700">10</text>
+
+  <!-- Footer note -->
+  <text x="750" y="760" text-anchor="middle" fill="#AAA" font-size="10">VisionWeb v3.13.0 — System Flow Diagram — Technical Document v1.1</text>
+</svg>

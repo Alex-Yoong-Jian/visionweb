@@ -1,0 +1,373 @@
+<svg viewBox="0 0 1500 860" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#1F4E79"/>
+    </marker>
+    <marker id="arr-up" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#666"/>
+    </marker>
+    <marker id="arr-green" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#1D6A3A"/>
+    </marker>
+    <marker id="arr-red" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#C0392B"/>
+    </marker>
+    <filter id="sh" x="-8%" y="-8%" width="116%" height="116%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2.5" flood-color="#00000018"/>
+    </filter>
+    <linearGradient id="laneBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#EEF4FB"/>
+      <stop offset="100%" style="stop-color:#F6F9FD"/>
+    </linearGradient>
+    <linearGradient id="lanePurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#F3EEF9"/>
+      <stop offset="100%" style="stop-color:#F9F6FD"/>
+    </linearGradient>
+    <linearGradient id="laneGreen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#EEF8F2"/>
+      <stop offset="100%" style="stop-color:#F5FBF7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1500" height="860" fill="#F4F6F9" rx="12"/>
+
+  <!-- Title bar -->
+  <rect x="0" y="0" width="1500" height="52" fill="#1F4E79" rx="12"/>
+  <rect x="0" y="40" width="1500" height="12" fill="#1F4E79"/>
+  <text x="750" y="32" text-anchor="middle" fill="white" font-size="17" font-weight="700" letter-spacing="0.5">VisionWeb — Module Interaction Diagram</text>
+
+  <!-- ═══════════════════════════════════
+       SWIM LANE BACKGROUNDS
+       Lane 1 BROWSER:   y=62 to y=490  h=428
+       Lane 2 SERVERLESS: y=490 to y=638 h=148
+       Lane 3 EXTERNAL:   y=638 to y=810 h=172
+  ════════════════════════════════════ -->
+
+  <!-- Lane 1: Browser -->
+  <rect x="0" y="62" width="1500" height="430" fill="url(#laneBlue)"/>
+  <rect x="0" y="62" width="90" height="430" fill="#2E75B6" opacity="0.12"/>
+  <text x="45" y="295" text-anchor="middle" fill="#1F4E79" font-size="13" font-weight="700" transform="rotate(-90,45,295)" letter-spacing="1">BROWSER — index.html</text>
+  <line x1="90" y1="62" x2="90" y2="492" stroke="#2E75B6" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+
+  <!-- Lane 2: Vercel -->
+  <rect x="0" y="492" width="1500" height="152" fill="url(#lanePurple)"/>
+  <rect x="0" y="492" width="90" height="152" fill="#6B3FA0" opacity="0.12"/>
+  <text x="45" y="575" text-anchor="middle" fill="#6B3FA0" font-size="12" font-weight="700" transform="rotate(-90,45,575)" letter-spacing="0.5">VERCEL SERVERLESS</text>
+  <line x1="0" y1="492" x2="1500" y2="492" stroke="#6B3FA0" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.4"/>
+  <line x1="90" y1="492" x2="90" y2="644" stroke="#6B3FA0" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+
+  <!-- Lane 3: External -->
+  <rect x="0" y="644" width="1500" height="176" fill="url(#laneGreen)"/>
+  <rect x="0" y="644" width="90" height="176" fill="#1D6A3A" opacity="0.1"/>
+  <text x="45" y="738" text-anchor="middle" fill="#1D6A3A" font-size="12" font-weight="700" transform="rotate(-90,45,738)" letter-spacing="0.5">EXTERNAL SERVICES</text>
+  <line x1="0" y1="644" x2="1500" y2="644" stroke="#1D6A3A" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.4"/>
+  <line x1="90" y1="644" x2="90" y2="820" stroke="#1D6A3A" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+
+  <!-- ═══════════════════════════════════
+       BROWSER MODULES — ROW 1 (main flow)
+       y-centre = 180
+       Module width=108, height=78
+       x positions: 115, 240, 365, 490, 615, 740, 870, 1000, 1130, 1260
+  ════════════════════════════════════ -->
+
+  <!-- ── ConsentManager ── -->
+  <g filter="url(#sh)">
+    <rect x="108" y="140" width="108" height="78" rx="8" fill="white" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <path d="M162 152 L174 157 L174 168 Q174 175 162 180 Q150 175 150 168 L150 157 Z" fill="#2E75B6" opacity="0.12" stroke="#2E75B6" stroke-width="1.5"/>
+  <path d="M157 166 L160 170 L167 162" stroke="#1D6A3A" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <text x="162" y="200" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">ConsentManager</text>
+  <text x="162" y="212" text-anchor="middle" fill="#666" font-size="8.5">PDPA weekly</text>
+  <text x="162" y="223" text-anchor="middle" fill="#666" font-size="8.5">consent flow</text>
+
+  <!-- arrow ConsentManager → App -->
+  <line x1="217" y1="179" x2="232" y2="179" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── App (state machine) ── -->
+  <g filter="url(#sh)">
+    <rect x="234" y="140" width="108" height="78" rx="8" fill="white" stroke="#1F4E79" stroke-width="2"/>
+  </g>
+  <!-- Gear/cog icon -->
+  <circle cx="288" cy="173" r="13" fill="#1F4E79" opacity="0.1" stroke="#1F4E79" stroke-width="1.5"/>
+  <circle cx="288" cy="173" r="5" fill="#1F4E79" opacity="0.3"/>
+  <text x="288" y="200" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">App</text>
+  <text x="288" y="212" text-anchor="middle" fill="#666" font-size="8.5">State machine</text>
+  <text x="288" y="223" text-anchor="middle" fill="#666" font-size="8.5">showPrompt()</text>
+
+  <!-- arrow App → Camera -->
+  <line x1="343" y1="179" x2="358" y2="179" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── Camera ── -->
+  <g filter="url(#sh)">
+    <rect x="360" y="140" width="108" height="78" rx="8" fill="white" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <rect x="388" y="154" width="52" height="34" rx="4" fill="#2E75B6" opacity="0.1" stroke="#2E75B6" stroke-width="1.5"/>
+  <circle cx="414" cy="171" r="9" fill="none" stroke="#2E75B6" stroke-width="1.5"/>
+  <circle cx="414" cy="171" r="4" fill="#2E75B6" opacity="0.3"/>
+  <rect cx="406" y="149" width="12" height="6" rx="2" fill="#2E75B6" opacity="0.4"/>
+  <text x="414" y="200" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">Camera</text>
+  <text x="414" y="212" text-anchor="middle" fill="#666" font-size="8.5">getUserMedia()</text>
+  <text x="414" y="223" text-anchor="middle" fill="#666" font-size="8.5">800×600 capture</text>
+
+  <!-- arrow Camera → HoldDetection -->
+  <line x1="469" y1="179" x2="484" y2="179" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── HoldDetection ── -->
+  <g filter="url(#sh)">
+    <rect x="486" y="140" width="108" height="78" rx="8" fill="white" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <circle cx="540" cy="168" r="14" fill="#2E75B6" opacity="0.1" stroke="#2E75B6" stroke-width="1.5"/>
+  <path d="M535 168 Q540 160 545 168" stroke="#2E75B6" stroke-width="1.5" fill="none"/>
+  <circle cx="540" cy="173" r="3" fill="#2E75B6"/>
+  <text x="540" y="200" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">HoldDetection</text>
+  <text x="540" y="212" text-anchor="middle" fill="#666" font-size="8.5">3.5s timer</text>
+  <text x="540" y="223" text-anchor="middle" fill="#666" font-size="8.5">progress ring</text>
+
+  <!-- arrow HoldDetection → Detector -->
+  <line x1="595" y1="179" x2="610" y2="179" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── Detector ── -->
+  <g filter="url(#sh)">
+    <rect x="612" y="140" width="108" height="78" rx="8" fill="#EEF4FB" stroke="#1F4E79" stroke-width="2"/>
+  </g>
+  <!-- API call icon -->
+  <rect x="638" y="153" width="48" height="30" rx="3" fill="#1F4E79" opacity="0.12" stroke="#1F4E79" stroke-width="1.5"/>
+  <text x="662" y="164" text-anchor="middle" fill="#1F4E79" font-size="8" font-weight="700">POST</text>
+  <line x1="638" y1="170" x2="686" y2="170" stroke="#1F4E79" stroke-width="1"/>
+  <text x="662" y="180" text-anchor="middle" fill="#1F4E79" font-size="7.5">/api/detect</text>
+  <text x="666" y="200" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">Detector</text>
+  <text x="666" y="212" text-anchor="middle" fill="#666" font-size="8.5">fetch() +</text>
+  <text x="666" y="223" text-anchor="middle" fill="#666" font-size="8.5">AbortController 20s</text>
+
+  <!-- arrow Detector → ResultBuilder -->
+  <line x1="721" y1="179" x2="736" y2="179" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── ResultBuilder ── -->
+  <g filter="url(#sh)">
+    <rect x="738" y="140" width="108" height="78" rx="8" fill="white" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <rect x="762" y="153" width="60" height="34" rx="3" fill="#2E75B6" opacity="0.1" stroke="#2E75B6" stroke-width="1.5"/>
+  <text x="792" y="167" text-anchor="middle" fill="#2E75B6" font-size="8">EN sentence</text>
+  <text x="792" y="178" text-anchor="middle" fill="#2E75B6" font-size="8">MY sentence</text>
+  <text x="792" y="200" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">ResultBuilder</text>
+  <text x="792" y="212" text-anchor="middle" fill="#666" font-size="8.5">Wraps Claude noun</text>
+  <text x="792" y="223" text-anchor="middle" fill="#666" font-size="8.5">phrase → sentence</text>
+
+  <!-- arrow ResultBuilder → ResultDisplay -->
+  <line x1="847" y1="179" x2="862" y2="179" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── ResultDisplay ── -->
+  <g filter="url(#sh)">
+    <rect x="864" y="140" width="108" height="78" rx="8" fill="white" stroke="#1D6A3A" stroke-width="1.5"/>
+  </g>
+  <rect x="888" y="153" width="60" height="38" rx="3" fill="#1D6A3A" opacity="0.1" stroke="#1D6A3A" stroke-width="1.5"/>
+  <line x1="888" y1="164" x2="948" y2="164" stroke="#1D6A3A" stroke-width="1"/>
+  <text x="918" y="200" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">ResultDisplay</text>
+  <text x="918" y="212" text-anchor="middle" fill="#666" font-size="8.5">Mode, EN+MY</text>
+  <text x="918" y="223" text-anchor="middle" fill="#666" font-size="8.5">score, scans left</text>
+
+  <!-- arrow ResultDisplay → Audio -->
+  <line x1="973" y1="179" x2="988" y2="179" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── Audio ── -->
+  <g filter="url(#sh)">
+    <rect x="990" y="140" width="108" height="78" rx="8" fill="white" stroke="#1D6A3A" stroke-width="1.5"/>
+  </g>
+  <path d="M1028 155 L1016 163 L1016 185 L1028 193 Z" fill="#1D6A3A" opacity="0.2" stroke="#1D6A3A" stroke-width="1.5"/>
+  <path d="M1030 160 Q1040 174 1030 188" stroke="#1D6A3A" stroke-width="1.5" fill="none"/>
+  <path d="M1033 156 Q1047 174 1033 192" stroke="#1D6A3A" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <text x="1044" y="200" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">Audio</text>
+  <text x="1044" y="212" text-anchor="middle" fill="#666" font-size="8.5">Web Speech API</text>
+  <text x="1044" y="223" text-anchor="middle" fill="#666" font-size="8.5">EN → MY queued</text>
+
+  <!-- ═══════════════════════════════════
+       BROWSER MODULES — ROW 2 (support + side modules)
+       y-centre = 360
+  ════════════════════════════════════ -->
+
+  <!-- ── SessionID ── -->
+  <g filter="url(#sh)">
+    <rect x="108" y="310" width="100" height="72" rx="8" fill="white" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <rect x="128" y="322" width="60" height="20" rx="3" fill="#2E75B6" opacity="0.15" stroke="#2E75B6" stroke-width="1"/>
+  <text x="158" y="334" text-anchor="middle" fill="#2E75B6" font-size="7.5" font-weight="700">UUID</text>
+  <text x="158" y="370" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">SessionID</text>
+  <text x="158" y="382" text-anchor="middle" fill="#666" font-size="8.5">localStorage UUID</text>
+
+  <!-- ── DeviceInfo ── -->
+  <g filter="url(#sh)">
+    <rect x="224" y="310" width="100" height="72" rx="8" fill="white" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <circle cx="274" cy="335" r="13" fill="#2E75B6" opacity="0.1" stroke="#2E75B6" stroke-width="1.5"/>
+  <text x="274" y="339" text-anchor="middle" fill="#2E75B6" font-size="9">UA</text>
+  <text x="274" y="370" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">DeviceInfo</text>
+  <text x="274" y="382" text-anchor="middle" fill="#666" font-size="8.5">UA + High Entropy</text>
+
+  <!-- ── TickSound ── -->
+  <g filter="url(#sh)">
+    <rect x="340" y="310" width="100" height="72" rx="8" fill="white" stroke="#2E75B6" stroke-width="1.5"/>
+  </g>
+  <path d="M378 323 L366 331 L366 347 L378 355 Z" fill="#2E75B6" opacity="0.2" stroke="#2E75B6" stroke-width="1.5"/>
+  <path d="M380 328 Q386 339 380 350" stroke="#2E75B6" stroke-width="1.5" fill="none"/>
+  <text x="390" y="370" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">TickSound</text>
+  <text x="390" y="382" text-anchor="middle" fill="#666" font-size="8.5">Camera+Result only</text>
+
+  <!-- ── UnlockManager ── -->
+  <g filter="url(#sh)">
+    <rect x="840" y="310" width="108" height="72" rx="8" fill="#EEF4FB" stroke="#1F4E79" stroke-width="1.5"/>
+  </g>
+  <rect x="864" y="322" width="60" height="28" rx="3" fill="#1F4E79" opacity="0.1" stroke="#1F4E79" stroke-width="1.5"/>
+  <line x1="864" y1="329" x2="924" y2="329" stroke="#1F4E79" stroke-width="1"/>
+  <text x="894" y="323" text-anchor="middle" fill="#1F4E79" font-size="8">email unlock</text>
+  <text x="894" y="370" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">UnlockManager</text>
+  <text x="894" y="382" text-anchor="middle" fill="#666" font-size="8.5">POST /api/unlock</text>
+
+  <!-- ── ReportManager ── -->
+  <g filter="url(#sh)">
+    <rect x="970" y="310" width="108" height="72" rx="8" fill="#EEF4FB" stroke="#1F4E79" stroke-width="1.5"/>
+  </g>
+  <rect x="994" y="322" width="60" height="28" rx="3" fill="#1F4E79" opacity="0.1" stroke="#1F4E79" stroke-width="1.5"/>
+  <line x1="994" y1="329" x2="1054" y2="329" stroke="#1F4E79" stroke-width="1"/>
+  <line x1="994" y1="336" x2="1054" y2="336" stroke="#1F4E79" stroke-width="1"/>
+  <text x="1024" y="370" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">ReportManager</text>
+  <text x="1024" y="382" text-anchor="middle" fill="#666" font-size="8.5">POST /api/report</text>
+
+  <!-- ── Support arrows (SessionID / DeviceInfo → Detector) ── -->
+  <path d="M158 382 L158 420 L620 420 L620 219" stroke="#2E75B6" stroke-width="1" stroke-dasharray="4,3" fill="none" marker-end="url(#arr)"/>
+  <text x="390" y="435" text-anchor="middle" fill="#2E75B6" font-size="8.5">sessionId supplied to every scan</text>
+
+  <path d="M274 382 L274 440 L630 440 L630 219" stroke="#2E75B6" stroke-width="1" stroke-dasharray="4,3" fill="none" marker-end="url(#arr)"/>
+  <text x="450" y="455" text-anchor="middle" fill="#2E75B6" font-size="8.5">deviceInfo supplied to every scan + report</text>
+
+  <!-- ═══════════════════════════════════
+       VERCEL SERVERLESS FUNCTIONS
+       y=492-644, centres at y=568
+  ════════════════════════════════════ -->
+
+  <!-- ── api/detect.js ── -->
+  <g filter="url(#sh)">
+    <rect x="540" y="508" width="140" height="72" rx="8" fill="white" stroke="#6B3FA0" stroke-width="2"/>
+  </g>
+  <rect x="563" y="520" width="94" height="24" rx="3" fill="#6B3FA0" opacity="0.1" stroke="#6B3FA0" stroke-width="1.5"/>
+  <text x="610" y="536" text-anchor="middle" fill="#6B3FA0" font-size="9" font-weight="700">api/detect.js</text>
+  <text x="610" y="562" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">Scan Limit + Claude</text>
+  <text x="610" y="574" text-anchor="middle" fill="#666" font-size="8.5">SHA-256 · HMAC verify</text>
+
+  <!-- ── api/unlock.js ── -->
+  <g filter="url(#sh)">
+    <rect x="820" y="508" width="140" height="72" rx="8" fill="white" stroke="#6B3FA0" stroke-width="2"/>
+  </g>
+  <rect x="843" y="520" width="94" height="24" rx="3" fill="#6B3FA0" opacity="0.1" stroke="#6B3FA0" stroke-width="1.5"/>
+  <text x="890" y="536" text-anchor="middle" fill="#6B3FA0" font-size="9" font-weight="700">api/unlock.js</text>
+  <text x="890" y="562" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">Email Verify</text>
+  <text x="890" y="574" text-anchor="middle" fill="#666" font-size="8.5">ilike lookup · HMAC sign</text>
+
+  <!-- ── api/report.js ── -->
+  <g filter="url(#sh)">
+    <rect x="1000" y="508" width="140" height="72" rx="8" fill="white" stroke="#6B3FA0" stroke-width="2"/>
+  </g>
+  <rect x="1023" y="520" width="94" height="24" rx="3" fill="#6B3FA0" opacity="0.1" stroke="#6B3FA0" stroke-width="1.5"/>
+  <text x="1070" y="536" text-anchor="middle" fill="#6B3FA0" font-size="9" font-weight="700">api/report.js</text>
+  <text x="1070" y="562" text-anchor="middle" fill="#1F4E79" font-size="10" font-weight="700">Issue Report</text>
+  <text x="1070" y="574" text-anchor="middle" fill="#666" font-size="8.5">Validate · Insert row</text>
+
+  <!-- Arrows: Detector → api/detect -->
+  <line x1="666" y1="219" x2="666" y2="480" stroke="#1F4E79" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="666" y1="480" x2="630" y2="507" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="690" y="370" fill="#1F4E79" font-size="8.5" text-anchor="start">POST image +</text>
+  <text x="690" y="382" fill="#1F4E79" font-size="8.5" text-anchor="start">sessionId + token</text>
+
+  <!-- Return arrow: api/detect → Detector -->
+  <line x1="590" y1="508" x2="640" y2="220" stroke="#666" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr-up)"/>
+  <text x="562" y="430" fill="#666" font-size="8" text-anchor="middle">JSON result</text>
+
+  <!-- Arrow: UnlockManager → api/unlock -->
+  <line x1="894" y1="383" x2="890" y2="507" stroke="#1F4E79" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="914" y="455" fill="#1F4E79" font-size="8" text-anchor="start">POST email</text>
+
+  <!-- Return: api/unlock → UnlockManager -->
+  <line x1="870" y1="508" x2="876" y2="384" stroke="#666" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr-up)"/>
+  <text x="840" y="455" fill="#666" font-size="8" text-anchor="end">HMAC token</text>
+
+  <!-- Arrow: ReportManager → api/report -->
+  <line x1="1050" y1="383" x2="1060" y2="507" stroke="#1F4E79" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="1075" y="450" fill="#1F4E79" font-size="8" text-anchor="start">POST form data</text>
+  <text x="1075" y="462" fill="#1F4E79" font-size="8" text-anchor="start">+ deviceInfo</text>
+
+  <!-- ═══════════════════════════════════
+       EXTERNAL SERVICES
+       y=644-820
+  ════════════════════════════════════ -->
+
+  <!-- ── Supabase ── -->
+  <g filter="url(#sh)">
+    <rect x="380" y="666" width="480" height="100" rx="10" fill="white" stroke="#1D6A3A" stroke-width="2"/>
+  </g>
+  <!-- Supabase label -->
+  <text x="620" y="690" text-anchor="middle" fill="#1D6A3A" font-size="13" font-weight="700">Supabase (PostgreSQL)</text>
+  <!-- Three sub-tables -->
+  <rect x="400" y="700" width="130" height="50" rx="6" fill="#1D6A3A" opacity="0.08" stroke="#1D6A3A" stroke-width="1"/>
+  <text x="465" y="720" text-anchor="middle" fill="#1D6A3A" font-size="9.5" font-weight="700">scan_sessions</text>
+  <text x="465" y="734" text-anchor="middle" fill="#555" font-size="8.5">Scan count + device info</text>
+  <text x="465" y="746" text-anchor="middle" fill="#555" font-size="8.5">per browser per week</text>
+
+  <rect x="555" y="700" width="130" height="50" rx="6" fill="#1D6A3A" opacity="0.08" stroke="#1D6A3A" stroke-width="1"/>
+  <text x="620" y="720" text-anchor="middle" fill="#1D6A3A" font-size="9.5" font-weight="700">allowed_emails</text>
+  <text x="620" y="734" text-anchor="middle" fill="#555" font-size="8.5">Authorised emails</text>
+  <text x="620" y="746" text-anchor="middle" fill="#555" font-size="8.5">for unlimited access</text>
+
+  <rect x="710" y="700" width="130" height="50" rx="6" fill="#1D6A3A" opacity="0.08" stroke="#1D6A3A" stroke-width="1"/>
+  <text x="775" y="720" text-anchor="middle" fill="#1D6A3A" font-size="9.5" font-weight="700">issue_reports</text>
+  <text x="775" y="734" text-anchor="middle" fill="#555" font-size="8.5">User submitted</text>
+  <text x="775" y="746" text-anchor="middle" fill="#555" font-size="8.5">issue reports</text>
+
+  <!-- ── Claude Haiku ── -->
+  <g filter="url(#sh)">
+    <rect x="1000" y="666" width="320" height="100" rx="10" fill="white" stroke="#1F4E79" stroke-width="2"/>
+  </g>
+  <text x="1160" y="690" text-anchor="middle" fill="#1F4E79" font-size="13" font-weight="700">Anthropic — Claude Haiku</text>
+  <text x="1160" y="710" text-anchor="middle" fill="#666" font-size="9.5">claude-haiku-4-5-20251001</text>
+  <text x="1160" y="730" text-anchor="middle" fill="#1F4E79" font-size="9.5">Returns:  { mode, description, descriptionMY, score }</text>
+  <text x="1160" y="748" text-anchor="middle" fill="#666" font-size="9">Input: base64 JPEG + structured prompt  |  Cost: ~$0.0015 / call</text>
+
+  <!-- Arrows: api/detect → Supabase scan_sessions -->
+  <line x1="580" y1="581" x2="500" y2="665" stroke="#1D6A3A" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <text x="515" y="632" text-anchor="end" fill="#1D6A3A" font-size="8.5">check + increment</text>
+  <text x="515" y="644" text-anchor="end" fill="#1D6A3A" font-size="8.5">scan_sessions</text>
+
+  <!-- Arrow: api/unlock → Supabase allowed_emails -->
+  <line x1="860" y1="581" x2="680" y2="665" stroke="#1D6A3A" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <text x="800" y="630" text-anchor="middle" fill="#1D6A3A" font-size="8.5">ilike email lookup</text>
+
+  <!-- Arrow: api/report → Supabase issue_reports -->
+  <line x1="1060" y1="581" x2="820" y2="665" stroke="#1D6A3A" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <text x="990" y="638" text-anchor="middle" fill="#1D6A3A" font-size="8.5">insert issue_reports</text>
+
+  <!-- Arrow: api/detect → Claude Haiku -->
+  <line x1="650" y1="581" x2="1050" y2="665" stroke="#1F4E79" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="880" y="618" text-anchor="middle" fill="#1F4E79" font-size="8.5">base64 image + prompt</text>
+  <text x="880" y="630" text-anchor="middle" fill="#1F4E79" font-size="8.5">(via Anthropic API)</text>
+
+  <!-- ── LEGEND ── -->
+  <rect x="1140" y="310" width="320" height="155" rx="8" fill="white" stroke="#DDD" stroke-width="1"/>
+  <text x="1155" y="330" fill="#1F4E79" font-size="11" font-weight="700">Legend</text>
+  <line x1="1155" y1="348" x2="1215" y2="348" stroke="#1F4E79" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="1225" y="352" fill="#444" font-size="10">Primary data flow</text>
+  <line x1="1155" y1="368" x2="1215" y2="368" stroke="#1F4E79" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="1225" y="372" fill="#444" font-size="10">HTTPS API call</text>
+  <line x1="1155" y1="388" x2="1215" y2="388" stroke="#666" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr-up)"/>
+  <text x="1225" y="392" fill="#444" font-size="10">Response return</text>
+  <line x1="1155" y1="408" x2="1215" y2="408" stroke="#1D6A3A" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <text x="1225" y="412" fill="#444" font-size="10">Database operation</text>
+  <line x1="1155" y1="428" x2="1215" y2="428" stroke="#2E75B6" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <text x="1225" y="432" fill="#444" font-size="10">Support data supplied</text>
+
+  <!-- Swim lane labels (right side) -->
+  <text x="1480" y="280" text-anchor="end" fill="#2E75B6" font-size="9" opacity="0.6">index.html — 14 modules</text>
+  <text x="1480" y="575" text-anchor="end" fill="#6B3FA0" font-size="9" opacity="0.6">3 serverless functions</text>
+  <text x="1480" y="738" text-anchor="end" fill="#1D6A3A" font-size="9" opacity="0.6">Supabase + Anthropic</text>
+
+  <!-- Footer -->
+  <text x="750" y="843" text-anchor="middle" fill="#AAA" font-size="10">VisionWeb v3.13.0 — Module Interaction Diagram — Technical Document v1.1</text>
+</svg>
