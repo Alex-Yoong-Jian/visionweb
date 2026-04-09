@@ -142,8 +142,50 @@
         &#9989; Report submitted successfully.<br>Thank you for helping improve VisionWeb.
       </div>
 
+      <div class="report-limit-msg" id="report-limit-msg">
+        &#9203; You have reached the weekly limit of 5 reports. Please try again next Monday.<br>
+        Had laporan mingguan dicapai. Sila cuba semula Isnin hadapan.
+      </div>
+
       <button class="report-btn" id="report-submit-btn" onclick="ReportManager.submit()">Submit Report</button>
       <div class="report-back" onclick="ReportManager.close()">&#8592; Back</div>
+    </div>
+  </div>
+
+  <!-- SCREEN: ADMIN -->
+  <div class="screen hidden" id="screen-admin">
+    <div class="admin-wrap">
+
+      <!-- PIN entry -->
+      <div id="admin-pin-wrap">
+        <div class="admin-logo">VisionWeb</div>
+        <div class="admin-pin-title">Admin Access</div>
+        <input class="admin-pin-input" type="password" id="admin-pin-input"
+               placeholder="Enter PIN" autocomplete="off" maxlength="20" />
+        <button class="admin-pin-btn" id="admin-pin-btn">Unlock</button>
+        <div class="admin-pin-error" id="admin-pin-error"></div>
+      </div>
+
+      <!-- Issues list -->
+      <div id="admin-issues-wrap" class="hidden">
+        <div class="admin-header">
+          <div class="admin-header-left">
+            <div class="admin-header-title">Issue Reports</div>
+            <span class="admin-total" id="admin-total"></span>
+          </div>
+          <div class="admin-header-right">
+            <button class="admin-action-btn" id="admin-logout-btn">Logout</button>
+            <button class="admin-action-btn admin-close-btn" id="admin-close-btn">&#10005;</button>
+          </div>
+        </div>
+        <div class="admin-issues-list" id="admin-issues-list"></div>
+        <div class="admin-pagination">
+          <button class="admin-page-btn" id="admin-prev-btn">&#8592; Prev</button>
+          <span class="admin-page-info" id="admin-page-info"></span>
+          <button class="admin-page-btn" id="admin-next-btn">Next &#8594;</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -166,6 +208,7 @@
   <script src="js/consent.js"></script>
   <script src="js/unlock.js"></script>
   <script src="js/report.js"></script>
+  <script src="js/admin.js"></script>
   <script src="js/app.js"></script>
 
 </body>

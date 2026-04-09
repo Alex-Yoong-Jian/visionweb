@@ -18,9 +18,10 @@ const ReportManager = (() => {
       const el = document.getElementById(id);
       if (el) el.classList.remove('show');
     });
-    document.getElementById('count-title').textContent = '0 / 50';
-    document.getElementById('count-desc').textContent  = '0 / 500';
+    document.getElementById('count-title').textContent   = '0 / 50';
+    document.getElementById('count-desc').textContent    = '0 / 500';
     document.getElementById('report-success').classList.remove('show');
+    document.getElementById('report-limit-msg').classList.remove('show');
     document.getElementById('report-submit-btn').disabled    = false;
     document.getElementById('report-submit-btn').textContent = 'Submit Report';
     ScreenManager.show('report');
@@ -51,6 +52,7 @@ const ReportManager = (() => {
     ['report-email','report-title','report-desc'].forEach(id =>
       document.getElementById(id).classList.remove('error')
     );
+    document.getElementById('report-limit-msg').classList.remove('show');
 
     let valid = true;
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -82,6 +84,7 @@ const ReportManager = (() => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email, title, description: desc,
+          sessionId:   SessionID.get(),
           browser:     device.browser    || null,
           os:          device.os         || null,
           device_type: device.deviceType || null,
@@ -90,6 +93,14 @@ const ReportManager = (() => {
         })
       });
       const data = await resp.json();
+
+      // Weekly rate limit reached
+      if (resp.status === 429) {
+        document.getElementById('report-limit-msg').classList.add('show');
+        btn.disabled    = false;
+        btn.textContent = 'Submit Report';
+        return;
+      }
 
       if (!resp.ok || !data.success) {
         btn.disabled    = false;

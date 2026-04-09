@@ -158,5 +158,6 @@ const App = (() => {
 
 window.addEventListener('DOMContentLoaded', () => {
   UnlockManager.init();
+  AdminPanel.init();
   App.init();
 });
