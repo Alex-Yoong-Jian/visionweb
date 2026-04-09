@@ -37,8 +37,12 @@ const ConsentManager = (() => {
     btn.classList.add('ready');
 
     // Audio fires on first gesture — required by mobile browser autoplay policy.
+    // Guard: skip if the gesture originated from the Accept button itself.
+    // On Edge mobile, synth.speak() entering a "reading" state visually grays out
+    // buttons — excluding the button tap from triggering audio prevents that.
     let audioStarted = false;
-    function startAudio() {
+    function startAudio(e) {
+      if (btn.contains(e.target)) return;
       if (audioStarted) return;
       audioStarted = true;
       Audio.speak(
@@ -61,8 +65,9 @@ const ConsentManager = (() => {
       recordConsent();
       onAccepted();
     }
-    btn.addEventListener('click',    onAccept);
-    btn.addEventListener('touchend', onAccept, { passive: true });
+    btn.addEventListener('click',       onAccept);
+    btn.addEventListener('touchend',    onAccept, { passive: true });
+    btn.addEventListener('pointerdown', onAccept);
   }
 
   return { hasConsented, show };

@@ -90,7 +90,9 @@ body { user-select: none; -webkit-user-select: none; touch-action: none; }
   /* Default: visible and tappable — JS adds .ready class immediately */
   pointer-events: auto; opacity: 1;
 }
-.consent-tap:active { background: #163c5e; transform: scale(0.98); }
+.consent-tap:active   { background: #163c5e; transform: scale(0.98); }
+/* Override browser default disabled styling — button must never appear grayed out */
+.consent-tap:disabled { background: #1F4E79; opacity: 1; cursor: pointer; }
 .consent-hint { font-size: 12px; color: #aaa; text-align: center; padding-bottom: 1rem; }
 
 /* ── Consent: compact layout on short screens (e.g. iPhone SE) ── */
