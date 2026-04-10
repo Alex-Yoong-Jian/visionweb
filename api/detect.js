@@ -18,6 +18,7 @@ const CLAUDE_ENDPOINT  = 'https://api.anthropic.com/v1/messages';
 const CLAUDE_MODEL     = 'claude-haiku-4-5-20251001';
 const SUPABASE_URL     = process.env.SUPABASE_URL;
 const SUPABASE_KEY     = process.env.SUPABASE_SERVICE_KEY; // service role — never anon
+const SUPABASE_SCHEMA  = process.env.SUPABASE_SCHEMA;      // e.g. 'vweb_prod' or 'vweb_test'
 const ANTHROPIC_KEY    = process.env.ANTHROPIC_API_KEY;
 const TOKEN_SECRET     = process.env.TOKEN_SECRET;
 const WEEKLY_LIMIT     = 10;
@@ -28,7 +29,7 @@ export default async function handler(req, res) {
   }
 
   // ── Validate env vars ──
-  if (!ANTHROPIC_KEY || !SUPABASE_URL || !SUPABASE_KEY || !TOKEN_SECRET) {
+  if (!ANTHROPIC_KEY || !SUPABASE_URL || !SUPABASE_KEY || !TOKEN_SECRET || !SUPABASE_SCHEMA) {
     console.error('Missing environment variables');
     return res.status(500).json({ error: 'Server configuration error' });
   }
@@ -157,10 +158,12 @@ Rules:
 async function checkAndIncrementScan(sessionKey, weekKey, deviceInfo = {}) {
   const url     = `${SUPABASE_URL}/rest/v1/scan_sessions`;
   const headers = {
-    'apikey':        SUPABASE_KEY,
-    'Authorization': `Bearer ${SUPABASE_KEY}`,
-    'Content-Type':  'application/json',
-    'Prefer':        'return=representation',
+    'apikey':          SUPABASE_KEY,
+    'Authorization':   `Bearer ${SUPABASE_KEY}`,
+    'Content-Type':    'application/json',
+    'Prefer':          'return=representation',
+    'Accept-Profile':  SUPABASE_SCHEMA,
+    'Content-Profile': SUPABASE_SCHEMA,
   };
 
   // Try to get existing session

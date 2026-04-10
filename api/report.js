@@ -14,6 +14,7 @@ import crypto from 'crypto';
 
 const SUPABASE_URL         = process.env.SUPABASE_URL;
 const SUPABASE_KEY         = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_SCHEMA      = process.env.SUPABASE_SCHEMA;     // e.g. 'vweb_prod' or 'vweb_test'
 const WEEKLY_REPORT_LIMIT  = 5;
 
 export default async function handler(req, res) {
@@ -21,7 +22,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  if (!SUPABASE_URL || !SUPABASE_KEY) {
+  if (!SUPABASE_URL || !SUPABASE_KEY || !SUPABASE_SCHEMA) {
     console.error('Missing environment variables');
     return res.status(500).json({ error: 'Server configuration error' });
   }
@@ -40,9 +41,11 @@ export default async function handler(req, res) {
   }
 
   const supabaseHeaders = {
-    'apikey':        SUPABASE_KEY,
-    'Authorization': `Bearer ${SUPABASE_KEY}`,
-    'Content-Type':  'application/json',
+    'apikey':          SUPABASE_KEY,
+    'Authorization':   `Bearer ${SUPABASE_KEY}`,
+    'Content-Type':    'application/json',
+    'Accept-Profile':  SUPABASE_SCHEMA,
+    'Content-Profile': SUPABASE_SCHEMA,
   };
 
   // ── Rate limit: max 5 reports per browser per week ──

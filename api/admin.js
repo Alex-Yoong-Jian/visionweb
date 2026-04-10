@@ -12,15 +12,16 @@
 
 import crypto from 'crypto';
 
-const TOKEN_SECRET = process.env.TOKEN_SECRET;
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
-const PAGE_SIZE    = 20;
+const TOKEN_SECRET    = process.env.TOKEN_SECRET;
+const SUPABASE_URL    = process.env.SUPABASE_URL;
+const SUPABASE_KEY    = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_SCHEMA = process.env.SUPABASE_SCHEMA;     // e.g. 'vweb_prod' or 'vweb_test'
+const PAGE_SIZE       = 20;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (!TOKEN_SECRET || !SUPABASE_URL || !SUPABASE_KEY) {
+  if (!TOKEN_SECRET || !SUPABASE_URL || !SUPABASE_KEY || !SUPABASE_SCHEMA) {
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
@@ -45,9 +46,10 @@ export default async function handler(req, res) {
       `&select=id,email,title,description,browser,os,device_type,brand,model,created_at`,
       {
         headers: {
-          'apikey':        SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Prefer':        'count=exact',
+          'apikey':         SUPABASE_KEY,
+          'Authorization':  `Bearer ${SUPABASE_KEY}`,
+          'Prefer':         'count=exact',
+          'Accept-Profile': SUPABASE_SCHEMA,
         }
       }
     );
